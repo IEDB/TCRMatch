@@ -1,11 +1,10 @@
-from setuptools import setup
+import setuptools
 from Cython.Build import cythonize
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setup(
-    ext_modules = cythonize("TCRMatch/mait_match.pyx", annotate=True),
+setuptools.setup(
     name="tcrmatch",
     version="0.0.1",
     author="Austin Crinklaw",
@@ -13,13 +12,9 @@ setup(
     description="TCRMatch",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/acrinklaw/tcrmatch",
+    url="https://github.com/IEDB/tcrmatch",
     packages=setuptools.find_packages(),
-    package_data={
-        'tcrmatch': [
-            'data/*'
-        ]
-    },
+    package_data={'TCRMatch': ['data/*']},
     include_package_data=True,
     install_requires=[
         'pandas',
@@ -31,4 +26,5 @@ setup(
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         "Operating System :: Unix",
     ],
+    ext_modules=cythonize("TCRMatch/mait_match.pyx", annotate=True),
 )
