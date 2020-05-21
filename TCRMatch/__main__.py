@@ -24,13 +24,13 @@ if len(sys.argv) < 2 or (sys.argv[1] not in tasks):
 
 elif sys.argv[1] == "match":
     prsr = argparse.ArgumentParser(
-        prog='match', description='Find matching CDR3beta sequences based on TCRMatch')
-    prsr.add_argument(
-        '-p',
-        help="number of threads (default is 1)",
-        type=int,
-        metavar='num_threads',
-        required=False)
+        prog='match',
+        description='Find matching CDR3beta sequences based on TCRMatch')
+    prsr.add_argument('-p',
+                      help="number of threads (default is 1)",
+                      type=int,
+                      metavar='num_threads',
+                      required=False)
     prsr.add_argument(
         '-i',
         help="input file containing a list of TCR CDR3beta sequences",
@@ -44,7 +44,7 @@ elif sys.argv[1] == "match":
         metavar='outfile_name',
         required=True)
     args = prsr.parse_args(sys.argv[2:])
-    
+
     if args.p:
         tcrmatch(args.i, args.o, args.p)
     else:

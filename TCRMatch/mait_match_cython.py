@@ -34,6 +34,7 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 blosum_mat = os.path.join(package_directory, 'data/blosum62.qij')
 iedb_data = os.path.join(package_directory, 'data/iedb_tcr.tsv')
 
+
 class Peptide:
     """Simple peptide class containing some things to make life easier
 
@@ -47,17 +48,19 @@ class Peptide:
         self.i = np.zeros(len(seq), dtype=np.int32)
         self.aff = 0.0
 
+
 def invalid_seq(seq):
     """Checks validity of amino acid sequence with regex
     
     Args:
         seq: amino acid string
     """
-    pattern=re.compile(r'[^A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y]')
-    if len(seq)>0 and not pattern.findall(seq):
+    pattern = re.compile(r'[^A|C|D|E|F|G|H|I|K|L|M|N|P|Q|R|S|T|V|W|Y]')
+    if len(seq) > 0 and not pattern.findall(seq):
         return False
     else:
         return True
+
 
 def read_pep_list(file):
     """Reads in and validates amino acid sequences
@@ -68,14 +71,17 @@ def read_pep_list(file):
     with open(file, "r") as inf:
         for line in inf:
             seqlist.append(line.rstrip())
-    
+
     peplist = []
     for seq in seqlist:
         if invalid_seq(seq):
-            raise ValueError('Invalid sequence: {} contains non-amino acid characters'.format(seq))
+            raise ValueError(
+                'Invalid sequence: {} contains non-amino acid characters'.
+                format(seq))
         peplist.append(Peptide(seq))
 
     return peplist
+
 
 def read_blossummat_qij():
     """Read in blosum frequency matrix for use in kernel methods
@@ -83,7 +89,7 @@ def read_blossummat_qij():
     with open(blosum_mat, "r") as inf:
         linelist = inf.readlines()
 
-    mat = np.zeros((20,20), dtype=float)
+    mat = np.zeros((20, 20), dtype=float)
     alphabet = ['' for i in range(20)]
 
     for line in linelist:
@@ -92,7 +98,7 @@ def read_blossummat_qij():
         if line[0] == "#": continue
         if line[:4] == '   A':
             for i in range(20):
-                alphabet[i] = line[i*7+3]
+                alphabet[i] = line[i * 7 + 3]
             j = 0
         else:
             tvec = line.split(" ")
@@ -103,6 +109,7 @@ def read_blossummat_qij():
             j += 1
 
     return mat, alphabet
+
 
 def get_scores(peplist1, peplist2, k1, thresh=0.7):
     """Retrieve kernel 3 scores for two lists of peptides
@@ -121,6 +128,7 @@ def get_scores(peplist1, peplist2, k1, thresh=0.7):
             if sco > thresh:
                 scores.append((pep1.seq, pep2.seq, sco))
     return scores
+
 
 def tcrmatch(in_name, out_name, n_threads=1):
     """Primary driver for TCRMatch algorithm
@@ -153,7 +161,7 @@ def tcrmatch(in_name, out_name, n_threads=1):
 
     if n_threads == 1:
         res = get_scores(peplist1, peplist2, k1)\
-        
+
         with open(out_name, "w") as outfile:
             outfile.write("input_sequence\tmatch_sequence\tscore\n")
             for tup in res:
@@ -161,8 +169,9 @@ def tcrmatch(in_name, out_name, n_threads=1):
     else:
         # Multiprocessing block - use functools partial to use multiparameters
         n_cpus = n_threads
-        pool = mp.Pool(processes = n_cpus)
-        res = pool.map(functools.partial(get_scores, peplist2=peplist2, k1=k1), np.array_split(peplist1, n_cpus))
+        pool = mp.Pool(processes=n_cpus)
+        res = pool.map(functools.partial(get_scores, peplist2=peplist2, k1=k1),
+                       np.array_split(peplist1, n_cpus))
         pool.close()
         pool.join()
 
@@ -170,4 +179,5 @@ def tcrmatch(in_name, out_name, n_threads=1):
             outfile.write("input_sequence\tmatch_sequence\tscore\n")
             for chunk in res:
                 for tup in chunk:
-                    outfile.write("{}\t{}\t{}\n".format(tup[0], tup[1], tup[2]))
+                    outfile.write("{}\t{}\t{}\n".format(
+                        tup[0], tup[1], tup[2]))
