@@ -21,7 +21,7 @@ import numpy as np
 import re
 import sys
 from math import sqrt
-from TCRMatch.mait_match import *
+from mait_match import *
 import multiprocessing as mp
 import functools
 import os
