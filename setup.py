@@ -15,14 +15,10 @@ setup(
     packages=['TCRMatch'],
     package_data={'TCRMatch': ['data/*']},
     include_package_data=True,
-    install_requires=[
-        'pandas',
-        'numpy',
-    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         "Operating System :: Unix",
     ],
-    ext_modules=[Extension('mait_match', ['TCRMatch/mait_match.c'])],
+    ext_modules=[Extension('tcrmatch_c', ['TCRMatch/tcrmatch.c'], extra_compile_args=['-std=c99'])],
 )
