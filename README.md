@@ -27,6 +27,9 @@ ASGDRGADTQY
 ASSQAGAYEQY
   ```
 
+- Alternatively, you can upload a TSV file in the AIRR format [(see specifications here)](https://docs.airr-community.org/en/stable/datarep/rearrangements.html).
+This can be specified by passing in the command line parameter ```-f airr```
+
 
 ### Commands
 -  Using a .txt file as an input:
@@ -41,11 +44,11 @@ python -m TCRMatch match -i /path/to/input.txt -o /path/to/output.txt
 
 | input_sequence | match_sequence | score              |
 |----------------|----------------|--------------------|
-| ASSQDRDTQY     | ASGDAGGGYEQY   | 0.7474520339781123 |
-| ASSQDRDTQY     | ASGDASGAETLY   | 0.8084889120179228 |
-| ASSQDRDTQY     | ASGDASGGNTLY   | 0.7825980249961477 |
-| ASSQDRDTQY     | ASGDFWGDTLY    | 0.7614741870953899 |
-| ASSQDRDTQY     | ASRYRDDSYNEQF  | 0.8165516456455025 |
+| ASSQDRDTQY     | ASGDAGGGYEQY   | 0.74 |
+| ASSQDRDTQY     | ASGDASGAETLY   | 0.80|
+| ASSQDRDTQY     | ASGDASGGNTLY   | 0.78 |
+| ASSQDRDTQY     | ASGDFWGDTLY    | 0.76 |
+| ASSQDRDTQY     | ASRYRDDSYNEQF  | 0.81 |
 
 ## How it works:
 - TCRMatch implements a kernel based similarity metric as defined in [arXiv:1205.6031v2](https://arxiv.org/abs/1205.6031v2)
