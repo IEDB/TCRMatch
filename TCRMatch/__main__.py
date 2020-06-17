@@ -9,6 +9,32 @@ import functools
 package_dir = os.path.dirname(os.path.abspath(__file__))
 iedb_file = os.path.join(package_dir, 'data/iedb_tcr.tsv')
 
+def parse_input(infile, airr=False, multiproc=False):
+    input_seqs = []
+    if not airr and multiproc:
+        with open(args.i, "r") as inf:
+            for line in inf:
+                input_seqs.append([line.rstrip().encode()])
+    if not airr and not multiproc:
+        with open(args.i, "r") as inf:
+            for line in inf:
+                input_seqs.append(line.rstrip().encode())
+    if airr and multiproc:
+        with open(args.i, "r") as inf:
+            inf.readline() #Skip header
+            for line in inf:
+                items = line.rstrip().split("\t")
+                if items[3] == "T":
+                    input_seqs.append([items[48].encode()])
+    if airr and not multiproc:
+        with open(args.i, "r") as inf:
+            inf.readline() #Skip header
+            for line in inf:
+                items = line.rstrip().split("\t")
+                if items[3] == "T":
+                    input_seqs.append(items[48].encode())
+    return input_seqs
+
 tasks = ["match"]
 if len(sys.argv) < 2 or (sys.argv[1] not in tasks):
     usage = """
@@ -33,11 +59,12 @@ elif sys.argv[1] == "match":
     prsr = argparse.ArgumentParser(
         prog='match',
         description='Find matching CDR3beta sequences based on TCRMatch')
-    prsr.add_argument('-p',
-                      help="number of threads (default is 1)",
-                      type=int,
-                      metavar='num_threads',
-                      required=False)
+    prsr.add_argument(
+        '-p',
+        help="number of threads (default is 1)",
+        type=int,
+        metavar='num_threads',
+        required=False)
     prsr.add_argument(
         '-i',
         help="input file containing a list of TCR CDR3beta sequences",
@@ -50,7 +77,16 @@ elif sys.argv[1] == "match":
         type=str,
         metavar='outfile_name',
         required=True)
+    prsr.add_argument(
+        '-f',
+        help="input file format (options are airr or text -- default is text)",
+        type=str,
+        metavar='input_format',
+        default='text',
+        required=False)
     args = prsr.parse_args(sys.argv[2:])
+
+
 
     # Parse and encode IEDB strings as binary strings
     iedb_seqs = []
@@ -58,11 +94,20 @@ elif sys.argv[1] == "match":
         for line in inf:
             iedb_seqs.append(line.rstrip().encode())
 
+    if args.f == 'text' and args.p:
+        input_seqs = parse_input(args.i, False, True)
+    elif args.f == 'airr' and args.p:
+        input_seqs = parse_input(args.i, True, True)
+    elif args.f == 'text' and not args.p:
+        input_seqs = parse_input(args.i, False, False)
+    elif args.f == 'airr' and not args.p:
+        input_seqs = parse_input(args.i, True, False)
+    else:
+        input_seqs = parse_input(args.i, False, False)
+        
+
+
     if args.p:
-        input_seqs = []
-        with open(args.i, "r") as inf:
-            for line in inf:
-                input_seqs.append([line.rstrip().encode()])
         pool = mp.Pool(processes = args.p)
         res = pool.map(functools.partial(tcrmatch_c, iedb_seqs), input_seqs)
         pool.close()
@@ -73,13 +118,7 @@ elif sys.argv[1] == "match":
                 for line in chunk:
                     outf.write(line[0].decode() + "\t" + line[1].decode() + "\t" + "{:.2f}".format(line[2]) + "\n")
     else:
-        # Parse and encode input strings as binary strings
-        input_seqs = []
-        with open(args.i, "r") as inf:
-            for line in inf:
-                input_seqs.append(line.rstrip().encode())
         res = tcrmatch_c(input_seqs, iedb_seqs)
-
         with open(args.o, "w") as outf:
             outf.write("input_sequence\tmatch_sequence\tscore\n")
             for line in res:
