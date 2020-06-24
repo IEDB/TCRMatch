@@ -177,6 +177,9 @@ PyObject* calculate_k3_list(PyObject *self, PyObject *args)
     sco = k3_sum(pep1.i, pep2.i, pep1.len, pep2.len) / sqrt(pep1.aff * pep2.aff);
     res = PyTuple_Pack(3, PyUnicode_FromString(pep1.seq), PyUnicode_FromString(pep2.seq), PyFloat_FromDouble(sco));
 
+    //free up dynamic memory allocs
+    free(pep1_i);
+    free(pep2_i);
     return res;
 }
 
