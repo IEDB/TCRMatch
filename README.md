@@ -36,6 +36,18 @@ This can be specified by passing in the command line parameter ```-f airr```
 ```shell
 python -m TCRMatch match -i /path/to/input.txt -o /path/to/output.txt
 ```
+
+### API
+The TCRMatch module also exposes a simple method for calculating the distance between two CDR3b sequences. This can be called by importing the module like so:
+```Python
+from tcrmatch_c import tcrmatch
+
+res = tcrmatch("ASSQDRDTQY", "ASGDAGGGYEQY")
+```
+The tcrmatch method returns a tuple containing the following format (seq1, seq2, tcrmatch_score)
+```Python
+("ASSQDRDTQY", "ASGDAGGGYEQY", .74)
+```
 ### Output  
 -  Output file has 3 columns in TSV format. 
 -  First column is the user provided input sequence.  
