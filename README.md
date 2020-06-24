@@ -4,7 +4,7 @@
 ## Requirements:
 - Linux OS
 - Python 3+
-  - Python packages: Pandas, Cython
+  - Python packages: numpy
 
 ## Installation:
 TCRMatch can be downloaded through PyPI using the following pip command.

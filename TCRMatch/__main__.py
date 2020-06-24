@@ -5,7 +5,8 @@ import math
 from tcrmatch_c import tcrmatch
 import multiprocessing as mp
 import functools
-import time 
+import numpy as np
+
 package_dir = os.path.dirname(os.path.abspath(__file__))
 iedb_file = os.path.join(package_dir, 'data/iedb_tcr.tsv')
 
@@ -85,6 +86,14 @@ elif sys.argv[1] == "match":
         metavar='input_format',
         default='text',
         required=False)
+    prsr.add_argument(
+        '-t',
+        help="minimum threshold to constitute a match (default is .97)",
+        type=float,
+        metavar='threshold',
+        default=.97,
+        required=False)
+
     args = prsr.parse_args(sys.argv[2:])
 
 
@@ -102,18 +111,20 @@ elif sys.argv[1] == "match":
 
     if args.p:
         pool = mp.Pool(processes = args.p)
-        res = pool.map(functools.partial(run_tcrmatch, iedb_seqs), input_seqs)
+        res = pool.map(functools.partial(run_tcrmatch, iedb_seqs), np.array_split(input_seqs, args.p))
         pool.close()
         pool.join()
         with open(args.o, "w") as outf:
             outf.write("input_sequence\tmatch_sequence\tscore\n")
             for chunk in res:
                 for line in chunk:
-                    outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2]) + "\n")
+                    if line[2] >= args.t:
+                        outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2]) + "\n")
     else:
         res = run_tcrmatch(input_seqs, iedb_seqs)
         with open(args.o, "w") as outf:
             outf.write("input_sequence\tmatch_sequence\tscore\n")
             for line in res:
-                outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2]) + "\n")
+                if line[2] >= args.t:
+                        outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2]) + "\n")
 
