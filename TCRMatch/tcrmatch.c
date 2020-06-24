@@ -122,95 +122,72 @@ float k3_sum(int *s1, int *s2, int l1, int l2)
 
 PyObject* calculate_k3_list(PyObject *self, PyObject *args)
 {
-    PyObject* input;
-    PyObject* iedb;
+    char* seq1;
+    char* seq2;
 
-    if (!PyArg_ParseTuple(args, "O!O!", &PyList_Type, &input, &PyList_Type, &iedb))
+    if (!PyArg_ParseTuple(args, "ss", &seq1, &seq2))
         return NULL;
-    char *alphabet = "ARNDCQEGHILKMFPSTWYV";
-    int in_cnt = PyList_Size(input);
-    int iedb_cnt = PyList_Size(iedb);
     
-    //declare arrays of peptide structs
-    PEPTIDE in_peps[in_cnt];
-    PEPTIDE iedb_l[iedb_cnt];
+    char *alphabet = "ARNDCQEGHILKMFPSTWYV";
+    //declare peptide structs for input strings
+    PEPTIDE pep1;
+    PEPTIDE pep2;
 
     //Calculate K1 matrix
     fmatrix_k1();
-
-    for (int i = 0; i < in_cnt; i++)
-    {
-        Py_ssize_t length;
-        PyBytes_AsStringAndSize(PyList_GetItem(input, i), &in_peps[i].seq, &length);
-        in_peps[i].len = length;
-        int *al_i = (int *)malloc(sizeof(int)*length);
-
-        //Simple loop to get position of current char in alphabet
-        for (int j = 0; j < length; j++)
-        {
-            char *e;
-            e = strchr(alphabet, in_peps[i].seq[j]);
-            al_i[j] = (int)(e - alphabet);
-        }
-        in_peps[i].i = al_i;
-        //Calculate normalization matrix
-        in_peps[i].aff = k3_sum(in_peps[i].i, in_peps[i].i, in_peps[i].len, in_peps[i].len);
-
-    }
-    for (int i = 0; i < iedb_cnt; i++)
-    {
-        Py_ssize_t length;
-        PyBytes_AsStringAndSize(PyList_GetItem(iedb, i), &iedb_l[i].seq, &length);
-        iedb_l[i].len = length;
-        int *al_i = (int *)malloc(sizeof(int)*length);
-
-        //Simple loop to get position of current char in alphabet
-        for (int j = 0; j < length; j++)
-        {
-            char *e;
-            e = strchr(alphabet, iedb_l[i].seq[j]);
-            al_i[j] = (int)(e - alphabet);
-        }
-        iedb_l[i].i = al_i;
-        //Calculate normalization matrix
-        iedb_l[i].aff = k3_sum(iedb_l[i].i, iedb_l[i].i, iedb_l[i].len, iedb_l[i].len);
-
-    }
     
-    PyObject *ret_vals = PyList_New(iedb_cnt * in_cnt);
-    int cnt = 0;
-    for (int i = 0; i < in_cnt; i++)
-    {
-        for (int j = 0; j < iedb_cnt; j++)
-        {
-            float sco;
-            sco = k3_sum(in_peps[i].i, iedb_l[j].i, in_peps[i].len, iedb_l[j].len) / sqrt(in_peps[i].aff * iedb_l[j].aff);
-            PyList_SET_ITEM(ret_vals, cnt, PyTuple_Pack(3, PyBytes_FromString(in_peps[i].seq), PyBytes_FromString(iedb_l[j].seq), PyFloat_FromDouble(sco)));
-            cnt++;
-        }
-    }
+    int length_s1;
+    length_s1 = strlen(seq1);
+    pep1.seq = seq1;
+    pep1.len = length_s1;
+    int *pep1_i = (int *)malloc(sizeof(int)*length_s1);
 
-    //free up dynamic memory allocations
-    for (int i = 0; i < in_cnt; i++)
+    //Simple loop to get position of current char in alphabet
+    for (int j = 0; j < length_s1; j++)
     {
-       free(in_peps[i].i);
+        char *e;
+        e = strchr(alphabet, pep1.seq[j]);
+        pep1_i[j] = (int)(e - alphabet);
     }
-    for (int i = 0; i < iedb_cnt; i++)
+    pep1.i = pep1_i;
+    //Calculate normalization matrix
+    pep1.aff = k3_sum(pep1.i, pep1.i, pep1.len, pep1.len);
+
+
+    int length_s2;
+    length_s2 = strlen(seq2);
+    pep2.seq = seq2;
+    pep2.len = length_s2;
+    int *pep2_i = (int *)malloc(sizeof(int)*length_s2);
+
+    //Simple loop to get position of current char in alphabet
+    for (int j = 0; j < length_s2; j++)
     {
-        free(iedb_l[i].i);
+        char *e;
+        e = strchr(alphabet, pep2.seq[j]);
+        pep2_i[j] = (int)(e - alphabet);
     }
+    pep2.i = pep2_i;
+    //Calculate normalization matrix
+    pep2.aff = k3_sum(pep2.i, pep2.i, pep2.len, pep2.len);
+
     
-    return ret_vals;
+    PyObject *res;
+    float sco;
+    sco = k3_sum(pep1.i, pep2.i, pep1.len, pep2.len) / sqrt(pep1.aff * pep2.aff);
+    res = PyTuple_Pack(3, PyUnicode_FromString(pep1.seq), PyUnicode_FromString(pep2.seq), PyFloat_FromDouble(sco));
+
+    return res;
 }
 
 //Python C API requires these to be defined
 static PyMethodDef MatchMethods[] = {
-    {"tcrmatch_c", calculate_k3_list, METH_VARARGS, "TCRMatch Python interface"},
+    {"tcrmatch", calculate_k3_list, METH_VARARGS, "TCRMatch Python interface"},
     {NULL, NULL, 0, NULL}};
 
 static struct PyModuleDef matchmodule = {
     PyModuleDef_HEAD_INIT,
-    "tcrmatch_c",
+    "tcrmatch",
     "TCRMatch Python interface",
     -1,
     MatchMethods};
