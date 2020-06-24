@@ -6,4 +6,6 @@ RUN apt-get update && \
     apt-get install -y ${PACKAGES} && \
     apt-get clean
 
-#RUN pip3 install tcrmatch
+RUN mkdir /TCRMatch
+COPY . /TCRMatch
+RUN cd /TCRMatch && python3 setup.py install
