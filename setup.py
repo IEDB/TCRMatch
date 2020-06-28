@@ -15,6 +15,7 @@ setup(
     packages=['TCRMatch'],
     package_data={'TCRMatch': ['data/*']},
     include_package_data=True,
+    install_requires=['numpy'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
