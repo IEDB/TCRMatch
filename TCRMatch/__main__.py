@@ -77,11 +77,11 @@ if len(sys.argv) < 2 or (sys.argv[1] not in tasks):
 	Usage: python -m TCRMatch <task> [options]
 
 	Available tasks are:
-		{:s}
+		match\n\t\tupdate
 
 	For help:
 	> python -m TCRMatch <task> -h
-	""".format(*tasks)
+	"""
     print(usage)
     sys.exit()
 
