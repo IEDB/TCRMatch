@@ -7,7 +7,12 @@
   - Python packages: numpy
 
 ## Installation:
-TCRMatch can be downloaded through PyPI using the following pip command.
+For now, TCRMatch can be installed by cloning the git repo, navigating to the TCRMatch folder and executing:
+```shell
+pip install .
+```
+
+WORK IN PROGRESS: TCRMatch can be downloaded through PyPI using the following pip command.
 ```shell
 pip install TCRMatch
 ```
@@ -32,6 +37,10 @@ This can be specified by passing in the command line parameter ```-f airr```
 
 
 ### Commands
+- To update the IEDB data file:
+```shell
+python -m TCRMatch update
+```
 -  Using a .txt file as an input:
 ```shell
 python -m TCRMatch match -i /path/to/input.txt -o /path/to/output.txt
@@ -53,6 +62,7 @@ The tcrmatch method returns a tuple containing the following format (seq1, seq2,
 ```Python
 ("ASSQDRDTQY", "ASGDAGGGYEQY", .74)
 ```
+
 ### Output  
 -  Output file has 5 columns in TSV format. 
 -  First column is the user provided input sequence.  

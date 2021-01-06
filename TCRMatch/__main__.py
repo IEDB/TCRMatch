@@ -5,6 +5,7 @@ import math
 from tcrmatch_c import tcrmatch
 import multiprocessing as mp
 import numpy as np
+import urllib.request
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 iedb_file = os.path.join(package_dir, 'data/IEDB_data.tsv')
@@ -24,13 +25,18 @@ with open(iedb_file, "r") as inf:
         orig_seq = line_l[1]
         receptor_group = line_l[2]
         epitopes = line_l[3]
+        try:
+            org = line_l[4]
+            antigen = line_l[5]
+        except:
+            org = " "
+            antigen = " "
         iedb_seqs.add(seq)
         # This simplifies receptor group output by creating lists that are later joined
         if seq in output_map:
-            output_map[seq][0].append(receptor_group)
+            output_map[seq].append((receptor_group, epitopes, org, antigen))
         else:
-            output_map[seq] = [[receptor_group], epitopes]
-
+            output_map[seq] = [(receptor_group, epitopes, org, antigen)]
 
 def parse_input(infile, fformat="text"):
     input_seqs = []
@@ -59,7 +65,7 @@ def run_tcrmatch(input_seqs, iedb_seqs=iedb_seqs):
 
     return res
 
-tasks = ["match"]
+tasks = ["match", "update"]
 if len(sys.argv) < 2 or (sys.argv[1] not in tasks):
     usage = """
   ________________  __  ___      __       __  
@@ -119,7 +125,6 @@ elif sys.argv[1] == "match":
     args = prsr.parse_args(sys.argv[2:])
     input_seqs = parse_input(args.i, args.f)
 
-
     if args.p:
         pool = mp.Pool(processes = args.p)
         res = pool.map(run_tcrmatch, np.array_split(input_seqs, args.p))
@@ -141,3 +146,10 @@ elif sys.argv[1] == "match":
                     # More disgusting output...output map has epitopes at position 1 and receptor groups at position 0
                     outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2])  + "\t" + output_map[line[1]][1] + "\t" + (",").join(output_map[line[1]][0]) + "\n")
 
+elif sys.argv[1] == "update":
+    print("Updating the IEDB data file")
+    curr_iedb = urllib.request.urlopen('https://downloads.iedb.org/misc/TCRMatch/IEDB_data.tsv').read()
+    print("...")
+    with open(iedb_file, "wb") as fh:
+        fh.write(curr_iedb)
+    print("Done!")
