@@ -1,5 +1,7 @@
 # TCRMatch
-### Authors: Austin Crinklaw, Will Chronister
+### Maintainer: Austin Crinklaw
+#### Please open any issues on Github, or feel free to email acrinklaw(at)lji(dot)org with feedback or concerns
+
 
 ## Requirements:
 - Linux OS
@@ -12,10 +14,6 @@ For now, TCRMatch can be installed by cloning the git repo, navigating to the TC
 pip install .
 ```
 
-WORK IN PROGRESS: TCRMatch can be downloaded through PyPI using the following pip command.
-```shell
-pip install TCRMatch
-```
 
 ## Usage:
 ### Input  
@@ -88,4 +86,7 @@ The tcrmatch method returns a tuple containing the following format (seq1, seq2,
 - Sequences that have a  score greater than the threshold are returned as matches
 
 ## References:
+[Chronister, William D. et al. "Tcrmatch: Predicting T-Cell Receptor Specificity Based On Sequence Similarity To Previously Characterized Receptors". Frontiers In Immunology, vol 12, 2021. Frontiers Media SA, doi:10.3389/fimmu.2021.640725.](https://www.frontiersin.org/articles/10.3389/fimmu.2021.640725/full)
+
 ["Towards a Mathematical Foundation of Immunology and Amino Acid Chains" arXiv:1205.6031v2](https://arxiv.org/abs/1205.6031v2)
+

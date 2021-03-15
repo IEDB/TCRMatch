@@ -65,6 +65,17 @@ def run_tcrmatch(input_seqs, iedb_seqs=iedb_seqs):
 
     return res
 
+"""
+def run_tcrmatch(input_seqs, iedb_seqs=iedb_seqs):
+    with open("test.csv", "w") as fh:
+        for in_seq in input_seqs:
+            for iedb_seq in iedb_seqs:
+                res = tcrmatch(in_seq, iedb_seq)
+                fh.write(res[0] + "\t" + res[1] + "\t" + str(res[2]) + "\n")
+
+    return
+"""
+
 tasks = ["match", "update"]
 if len(sys.argv) < 2 or (sys.argv[1] not in tasks):
     usage = """
@@ -131,20 +142,27 @@ elif sys.argv[1] == "match":
         pool.close()
         pool.join()
         with open(args.o, "w") as outf:
-            outf.write("input_sequence\tmatch_sequence\tscore\tepitopes\treceptor_group\n")
+            outf.write("input_sequence\tmatch_sequence\tscore\tepitopes\treceptor_group\tantigen\tsource_organism\n")
             for chunk in res:
                 for line in chunk:
                     if line[2] >= args.t:
-                        # Disgusting output...output map has epitopes at position 1 and receptor groups at position 0
-                        outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2])  + "\t" + output_map[line[1]][1] + "\t" + (",").join(output_map[line[1]][0]) + "\n")
+                        cur_grp = ','.join([x[0] for x in output_map[line[1]]])
+                        cur_epi = ','.join([x[1] for x in output_map[line[1]]])
+                        cur_org = ','.join([x[2] for x in output_map[line[1]]])
+                        cur_anti = ','.join([x[3] for x in output_map[line[1]]])
+                        outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2])  + "\t" + cur_epi + "\t" + cur_grp + "\t" + cur_anti + "\t" + cur_org + "\n")
+        
     else:
         res = run_tcrmatch(input_seqs, iedb_seqs)
         with open(args.o, "w") as outf:
-            outf.write("input_sequence\tmatch_sequence\tscore\tepitopes\treceptor_group\n")
+            outf.write("input_sequence\tmatch_sequence\tscore\tepitopes\treceptor_group\tantigen\tsource_organism\n")
             for line in res:
                 if line[2] >= args.t:
-                    # More disgusting output...output map has epitopes at position 1 and receptor groups at position 0
-                    outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2])  + "\t" + output_map[line[1]][1] + "\t" + (",").join(output_map[line[1]][0]) + "\n")
+                    cur_grp = ','.join([x[0] for x in output_map[line[1]]])
+                    cur_epi = ','.join([x[1] for x in output_map[line[1]]])
+                    cur_org = ','.join([x[2] for x in output_map[line[1]]])
+                    cur_anti = ','.join([x[3] for x in output_map[line[1]]])
+                    outf.write(line[0] + "\t" + line[1] + "\t" + "{:.2f}".format(line[2])  + "\t" + cur_epi + "\t" + cur_grp + "\t" + cur_anti + "\t" + cur_org + "\n")
 
 elif sys.argv[1] == "update":
     print("Updating the IEDB data file")

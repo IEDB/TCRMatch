@@ -1,0 +1,65 @@
+input_sequence	match_sequence	score	epitopes	receptor_group	antigen	source_organism
+ASSSRSSYEQY	ASSNRSSYEQY	0.97	GILGFVFTL	16861	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSARSSYEQY	0.98	GILGFVFTL,RAKFKQLL,GLCTLVAML	53258	Matrix protein 1,Trans-activator protein BZLF1,Transcriptional regulator IE63 homolog	Influenza A virus,Human herpesvirus 4 (Epstein Barr virus),Human herpesvirus 4 (Epstein Barr virus)
+ASSSRSSYEQY	ASSSRASYEQY	0.98	GILGFVFTL,GILGFVFTL	55749,35208	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSSRSSYEQY	ASSERSSYEQY	0.97	AMKRHGLDNYREYSLGN	21200	 	 
+ASSSRSSYEQY	ASSKRSSYEQY	0.97	GILGFVFTL	41132	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSRSSYEQY	0.98	FVCNLLLLFVTVYSHLLLV,GILGFVFTL	120740,13575	ORF3a protein [Severe acute respiratory syndrome coronavirus 2],Matrix protein 1	SARS-CoV2,Influenza A virus
+ASSSRSSYEQY	ASSQRSSYEQY	0.97	GILGFVFTL,GILGFVFTL	35204,54706	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSSRSSYEQY	AISSRSSYEQY	0.98	NLVPMVATV	12324	HCMVUL83	Human herpesvirus 5 (Human cytomegalovirus)
+ASSSRSSYEQY	ASSSRSAYEQY	0.98	GILGFVFTL,GILGFVFTL	30107,55813	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSSRSSYEQY	ASSSRSSYDQY	0.98	GILGFVFTL	13590	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSTRSSYEQY	0.98	GILGFVFTL,GLCTLVAML,GILGFVFTL	35225,173961,13981	Matrix protein 1,Transcriptional regulator IE63 homolog,Matrix protein 1	Influenza A virus,Human herpesvirus 4 (Epstein Barr virus),Influenza A virus
+ASSSRSSYEQY	ASSSRSSYEQY	1.00	GILGFVFTL,EAAGIGILTV,ELAGIGILTV,GILGFVFTL	55836,29789,35214	Matrix protein 1,Melanoma antigen recognized by T-cells 1,Matrix protein 1	Influenza A virus,Homo sapiens (human),Influenza A virus
+ASSSRSSYEQY	ASSSRTSYEQY	0.98	GILGFVFTL	13594	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSVRSSYEQH	0.98	GILGFVFTL	14454	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASGIRSSYEQY	0.97	GILGFVFTL	13072	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASRIRSSYEQY	0.97	GILGFVFTL	13396	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASNIRSSYEQY	0.98	GILGFVFTL	14564	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ANSIRSSYEQY	0.98	GILGFVFTL	13069	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSIRSSYEQY	1.00	GILGFVFTL,GILGFVFTL,GILGFVFTL,GILGFVFTL,GLCTLVAML,GILGFVFTL,GILGFVFTL	8614,13498,35301,17655,170516,13976,30195	Matrix protein 1,Matrix protein 1,Matrix protein 1,Matrix protein 1,Transcriptional regulator IE63 homolog,Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus,Influenza A virus,Influenza A virus,Human herpesvirus 4 (Epstein Barr virus),Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSIRSSYKQY	0.98	GILGFVFTL	14631	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSMRSSYEQY	0.98	GILGFVFTL,GILGFVFTL,GILGFVFTL	57071,13983,30102	Matrix protein 1,Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSVRSAYEQY	0.97	GILGFVFTL,GILGFVFTL	8661,55410	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSVRSSYEQY	0.99	GILGFVFTL,GILGFVFTL,GILGFVFTL	8662,35232,57125	Matrix protein 1,Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSIRSSYDQY	0.98	GILGFVFTL	13496	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSIRSSYERY	0.98	GILGFVFTL	25300	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSIRASYEQY	0.98	GILGFVFTL,GILGFVFTL	57178,27387	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSIRTSYEQY	0.98	GILGFVFTL,GILGFVFTL	35309,13511	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSIRSSYEQF	0.99	GILGFVFTL,GILGFVFTL	20652,53521	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSVRSTYEQY	0.97	GILGFVFTL	48370	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ATSVRSSYEQY	0.98	GILGFVFTL	14839	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSIRSAYEQY	0.98	GILGFVFTL,GILGFVFTL,GLCTLVAML,GILGFVFTL,GILGFVFTL	13969,8615,170515,35292,30095	Matrix protein 1,Matrix protein 1,Transcriptional regulator IE63 homolog,Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus,Human herpesvirus 4 (Epstein Barr virus),Influenza A virus,Influenza A virus
+ASSIRSSYEQY	AGSIRSSYEQY	0.98	GILGFVFTL	14728	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSIRSTYEQY	0.98	GILGFVFTL	57089	Matrix protein 1	Influenza A virus
+ASSIRSSYEQY	ASSLRSSYEQY	0.98	SEHDYQIGGYTEKW,GILGFVFTL	99685,35326	ORF3a protein [Severe acute respiratory syndrome coronavirus 2],Matrix protein 1	SARS-CoV2,Influenza A virus
+ASSIRSSYEQY	ASSIRSAYEQF	0.97	GILGFVFTL,GILGFVFTL	16904,27388	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSIRSSYEQY	ASSIRSSFEQY	0.98	FLPFFSNVTWFHAI	92073	surface glycoprotein [Severe acute respiratory syndrome coronavirus 2]	SARS-CoV2
+ASSIRAAETQY	ASSIRAAETRY	0.98	NLVPMVATV	12181	HCMVUL83	Human herpesvirus 5 (Human cytomegalovirus)
+ASSIRAAETQY	ASSIRAADTQY	0.97	GILGFVFTL	20554	Matrix protein 1	Influenza A virus
+ASSIRAAETQY	ASSIRAAETQY	1.00	GILGFVFTL	40439	Matrix protein 1	Influenza A virus
+ASSIRAAETQY	ASSIRASETQY	0.98	GILGFVFTL	40521	Matrix protein 1	Influenza A virus
+ASSIRAAETQY	ASRIRAAETQY	0.97	GILGFVFTL	15084	Matrix protein 1	Influenza A virus
+ASSIRAAETQY	ASSMRAAETQY	0.98	NLVPMVATV	12252	HCMVUL83	Human herpesvirus 5 (Human cytomegalovirus)
+ASSIRSSTEAF	ASSVRASTEAF	0.97	GILGFVFTL	14538	Matrix protein 1	Influenza A virus
+ASSIRSSTEAF	ASSVRSSTEQF	0.97	GILGFVFTL	14338	Matrix protein 1	Influenza A virus
+ASSIRSSTEAF	ASSIRSTTEAF	0.98	GILGFVFTL	53622	Matrix protein 1	Influenza A virus
+ASSIRSSTEAF	ASSIRSSAEAF	0.97	GILGFVFTL	24548	Matrix protein 1	Influenza A virus
+ASSIRSSTEAF	ASSTRSSTEAF	0.97	NLVPMVATV	12325	HCMVUL83	Human herpesvirus 5 (Human cytomegalovirus)
+ASSIRSSTEAF	ASSVRSATEAF	0.97	GILGFVFTL	14349	Matrix protein 1	Influenza A virus
+ASSIRSSTEAF	ASSIRSNTEAF	0.97	GILGFVFTL,GILGFVFTL	13978,53492	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSIRSSTEAF	ASSIRSSTEAF	1.00	GILGFVFTL	8682	Matrix protein 1	Influenza A virus
+ASSIRSSTEAF	ASSIRSATEAF	0.98	GILGFVFTL	15890	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSNRSSYEQY	0.97	GILGFVFTL	16861	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSARSSYEQY	0.98	GILGFVFTL,RAKFKQLL,GLCTLVAML	53258	Matrix protein 1,Trans-activator protein BZLF1,Transcriptional regulator IE63 homolog	Influenza A virus,Human herpesvirus 4 (Epstein Barr virus),Human herpesvirus 4 (Epstein Barr virus)
+ASSSRSSYEQY	ASSSRASYEQY	0.98	GILGFVFTL,GILGFVFTL	55749,35208	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSSRSSYEQY	ASSERSSYEQY	0.97	AMKRHGLDNYREYSLGN	21200	 	 
+ASSSRSSYEQY	ASSKRSSYEQY	0.97	GILGFVFTL	41132	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSRSSYEQY	0.98	FVCNLLLLFVTVYSHLLLV,GILGFVFTL	120740,13575	ORF3a protein [Severe acute respiratory syndrome coronavirus 2],Matrix protein 1	SARS-CoV2,Influenza A virus
+ASSSRSSYEQY	ASSQRSSYEQY	0.97	GILGFVFTL,GILGFVFTL	35204,54706	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSSRSSYEQY	AISSRSSYEQY	0.98	NLVPMVATV	12324	HCMVUL83	Human herpesvirus 5 (Human cytomegalovirus)
+ASSSRSSYEQY	ASSSRSAYEQY	0.98	GILGFVFTL,GILGFVFTL	30107,55813	Matrix protein 1,Matrix protein 1	Influenza A virus,Influenza A virus
+ASSSRSSYEQY	ASSSRSSYDQY	0.98	GILGFVFTL	13590	Matrix protein 1	Influenza A virus
+ASSSRSSYEQY	ASSTRSSYEQY	0.98	GILGFVFTL,GLCTLVAML,GILGFVFTL	35225,173961,13981	Matrix protein 1,Transcriptional regulator IE63 homolog,Matrix protein 1	Influenza A virus,Human herpesvirus 4 (Epstein Barr virus),Influenza A virus
+ASSSRSSYEQY	ASSSRSSYEQY	1.00	GILGFVFTL,EAAGIGILTV,ELAGIGILTV,GILGFVFTL	55836,29789,35214	Matrix protein 1,Melanoma antigen recognized by T-cells 1,Matrix protein 1	Influenza A virus,Homo sapiens (human),Influenza A virus
+ASSSRSSYEQY	ASSSRTSYEQY	0.98	GILGFVFTL	13594	Matrix protein 1	Influenza A virus
