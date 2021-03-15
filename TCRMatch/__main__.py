@@ -65,17 +65,6 @@ def run_tcrmatch(input_seqs, iedb_seqs=iedb_seqs):
 
     return res
 
-"""
-def run_tcrmatch(input_seqs, iedb_seqs=iedb_seqs):
-    with open("test.csv", "w") as fh:
-        for in_seq in input_seqs:
-            for iedb_seq in iedb_seqs:
-                res = tcrmatch(in_seq, iedb_seq)
-                fh.write(res[0] + "\t" + res[1] + "\t" + str(res[2]) + "\n")
-
-    return
-"""
-
 tasks = ["match", "update"]
 if len(sys.argv) < 2 or (sys.argv[1] not in tasks):
     usage = """
