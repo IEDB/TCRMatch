@@ -9,7 +9,7 @@
 - CMake > 3.10 (if you wish to compile from source)
 
 ## Installation:
-Please download TCRMatch from the latest release.
+Please download TCRMatch from the latest [release](https://github.com/IEDB/TCRMatch/releases/tag/v0.1.0).
 If you wish to compile from source, simply clone the repo and run
 ```shell
 cmake . && cmake --build .
