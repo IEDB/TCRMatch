@@ -1,4 +1,4 @@
-# TCRMatch v1.0
+# TCRMatch
 ### Maintainer: Austin Crinklaw
 #### Please open any issues on Github, or feel free to email acrinklaw(at)lji(dot)org with feedback or concerns
 
@@ -6,7 +6,7 @@
 ## Requirements:
 - Linux OS
 - Python 3 (to generate certain output)
-- CMake (if you wish to compile from source)
+- CMake > 3.10 (if you wish to compile from source)
 
 ## Installation:
 Please download TCRMatch from the latest release.
@@ -33,10 +33,11 @@ ASSQAGAYEQY
 
 To generate the initial scores, please run
 ```shell
-./tcrmatch -i input_file -t num_threads > output_file
+./tcrmatch -i input_file -t num_threads [-s threshold] > output_file
 ```
 - -i specifies the path to the input file
 - -t specifies the number of threads to use if operating on more than 1 core
+- -s optional parameter to specify the threshold (default is .97, in alignment with manuscript)
 
 To generate the output format which contains information regarding epitopes, receptor groups, antigens and source organisms, navigate to the "scripts" folder and run the process_output.py file.
 ```shell

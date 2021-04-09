@@ -164,7 +164,7 @@ float k3_sum(peptide pep1, peptide pep2) {
 }
 
 void multi_calc_k3(std::vector<peptide> peplist1,
-                   std::vector<peptide> peplist2) {
+                   std::vector<peptide> peplist2, float threshold) {
   // Simple method to calculate pairwise TCRMatch scores using two peptide
   // vectors
   std::vector<std::tuple<std::string, std::string, float>>
@@ -176,7 +176,7 @@ void multi_calc_k3(std::vector<peptide> peplist1,
       peptide pep2 = peplist2[j];
       float score = 0.0;
       score = k3_sum(pep1, pep2) / sqrt(pep1.aff * pep2.aff);
-      if (score > .97) {
+      if (score > threshold) {
         int tid = omp_get_thread_num();
         results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score));
       }
@@ -195,12 +195,14 @@ void multi_calc_k3(std::vector<peptide> peplist1,
 int main(int argc, char *argv[]) {
   int opt;
   int n_threads;
+  float threshold;
   std::string in_file;
   int i_flag = -1;
   int t_flag = -1;
+  int thresh_flag = -1;
 
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "t:i:")) != -1) {
+  while ((opt = getopt(argc, argv, "t:i:s:")) != -1) {
     switch (opt) {
     case 't':
       n_threads = atoi(optarg);
@@ -210,8 +212,12 @@ int main(int argc, char *argv[]) {
       in_file = optarg;
       i_flag = 1;
       break;
+    case 's':
+      threshold = std::stof(optarg);
+      thresh_flag = 1;
+      break;
     default:
-      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -t num_threads"
+      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -t num_threads -s score_threshold"
                 << std::endl;
       return EXIT_FAILURE;
     }
@@ -222,6 +228,9 @@ int main(int argc, char *argv[]) {
               << "Usage: ./tcrmatch -i infile_name.txt -t num_threads"
               << std::endl;
     return EXIT_FAILURE;
+  }
+  if (thresh_flag == -1) {
+    threshold = .97;
   }
 
   std::vector<std::string> iedb_data = read_IEDB_data();
@@ -281,7 +290,7 @@ int main(int argc, char *argv[]) {
     }
     it->aff = k3_sum(*it, *it);
   }
-  multi_calc_k3(peplist1, peplist2);
+  multi_calc_k3(peplist1, peplist2, threshold);
 
   return 0;
 }
