@@ -9,3 +9,4 @@ RUN apt-get install -y git cmake g++
 RUN git clone https://github.com/IEDB/TCRMatch.git
 RUN cd /TCRMatch/ && make
 RUN scripts/update.sh
+
