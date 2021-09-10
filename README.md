@@ -4,15 +4,14 @@
 
 
 ## Requirements:
-- Linux OS
+- Linux OS and the g++ compiler
 - Python 3 (to generate certain output)
-- CMake > 3.10 (if you wish to compile from source)
 
 ## Installation:
-Please download TCRMatch from the latest [release](https://github.com/IEDB/TCRMatch/releases/tag/v0.1.0).
+Please download TCRMatch from the latest [release](https://github.com/IEDB/TCRMatch/releases/tag/v0.1.1).
 If you wish to compile from source, simply clone the repo and run
 ```shell
-cmake . && cmake --build .
+make
 ```
 
 
@@ -33,11 +32,12 @@ ASSQAGAYEQY
 
 To generate the initial scores, please run
 ```shell
-./tcrmatch -i input_file -t num_threads [-s threshold] > output_file
+./tcrmatch -i input_file -t num_threads [-s threshold] [-d /path/to/database]> output_file
 ```
 - -i specifies the path to the input file
 - -t specifies the number of threads to use if operating on more than 1 core
 - -s optional parameter to specify the threshold (default is .97, in alignment with manuscript)
+- -d optional parameter to specify where the database is located, point this to a file of newline separated CDR3b sequences to test your own private set
 
 To generate the output format which contains information regarding epitopes, receptor groups, antigens and source organisms, navigate to the "scripts" folder and run the process_output.py file.
 ```shell

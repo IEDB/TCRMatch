@@ -83,9 +83,9 @@ struct peptide {
   std::vector<int> i;
 };
 
-std::vector<std::string> read_IEDB_data() {
+std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
   std::vector<std::string> iedb_data;
-  std::ifstream iedb_file("data/IEDB_data.tsv");
+  std::ifstream iedb_file(IEDB_data_file);
   std::string line;
   while (getline(iedb_file, line)) {
     std::stringstream ss(line);
@@ -163,8 +163,8 @@ float k3_sum(peptide pep1, peptide pep2) {
   return (k3);
 }
 
-void multi_calc_k3(std::vector<peptide> peplist1,
-                   std::vector<peptide> peplist2, float threshold) {
+void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
+                   float threshold) {
   // Simple method to calculate pairwise TCRMatch scores using two peptide
   // vectors
   std::vector<std::tuple<std::string, std::string, float>>
@@ -197,12 +197,13 @@ int main(int argc, char *argv[]) {
   int n_threads;
   float threshold;
   std::string in_file;
+  std::string iedb_file = "data/IEDB_data.tsv";
   int i_flag = -1;
   int t_flag = -1;
   int thresh_flag = -1;
 
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "t:i:s:")) != -1) {
+  while ((opt = getopt(argc, argv, "t:i:s:d:")) != -1) {
     switch (opt) {
     case 't':
       n_threads = atoi(optarg);
@@ -216,8 +217,12 @@ int main(int argc, char *argv[]) {
       threshold = std::stof(optarg);
       thresh_flag = 1;
       break;
+    case 'd':
+      iedb_file = optarg;
+      break;
     default:
-      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -t num_threads -s score_threshold"
+      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -t num_threads -s "
+                   "score_threshold -d /path/to/database"
                 << std::endl;
       return EXIT_FAILURE;
     }
@@ -233,7 +238,7 @@ int main(int argc, char *argv[]) {
     threshold = .97;
   }
 
-  std::vector<std::string> iedb_data = read_IEDB_data();
+  std::vector<std::string> iedb_data = read_IEDB_data(iedb_file);
   std::ifstream file1(in_file);
   std::string line;
   std::string alphabet;
@@ -259,12 +264,12 @@ int main(int argc, char *argv[]) {
 
 // Calculate the normalization score (aff) (kernel 3 self vs self) list 1
 #pragma omp parallel for
-  for (std::vector<peptide>::iterator it = peplist1.begin();
-       it != peplist1.end(); it++) {
-    for (int x = 0; x < it->len; x++) {
-      it->i.push_back(alphabet.find(it->seq[x]));
+  for (int i = 0; i < peplist1.size(); i++) {
+    peptide *pep_ptr = &peplist1[i];
+    for (int x = 0; x < pep_ptr->len; x++) {
+      pep_ptr->i.push_back(alphabet.find(pep_ptr->seq[x]));
     }
-    it->aff = k3_sum(*it, *it);
+    pep_ptr->aff = k3_sum(*pep_ptr, *pep_ptr);
   }
 
   // change to IEDB data
@@ -283,12 +288,12 @@ int main(int argc, char *argv[]) {
 
 // Calculate the normalization score (aff) (kernel 3 self vs self) for list 2
 #pragma omp parallel for
-  for (std::vector<peptide>::iterator it = peplist2.begin();
-       it != peplist2.end(); it++) {
-    for (int x = 0; x < it->len; x++) {
-      it->i.push_back(alphabet.find(it->seq[x]));
+  for (int i = 0; i < peplist2.size(); i++) {
+    peptide *pep_ptr = &peplist2[i];
+    for (int x = 0; x < pep_ptr->len; x++) {
+      pep_ptr->i.push_back(alphabet.find(pep_ptr->seq[x]));
     }
-    it->aff = k3_sum(*it, *it);
+    pep_ptr->aff = k3_sum(*pep_ptr, *pep_ptr);
   }
   multi_calc_k3(peplist1, peplist2, threshold);
 
