@@ -32,7 +32,7 @@ ASSQAGAYEQY
 
 To generate the initial scores, please run
 ```shell
-./tcrmatch -i input_file -t num_threads [-s threshold] [-d /path/to/database]> output_file
+./tcrmatch -i input_file -t num_threads [-s threshold] [-d /path/to/database] > output_file
 ```
 - -i specifies the path to the input file
 - -t specifies the number of threads to use if operating on more than 1 core
