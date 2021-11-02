@@ -98,6 +98,42 @@ std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
   return iedb_data;
 }
 
+std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
+  std::vector<std::string> airr_data;
+  std::ifstream airr_file(AIRR_data_file);
+  std::string line;
+  std::string temp;
+  int column = -1, idx;
+
+  // get cdr3_aa column
+  idx = 0;
+  std::getline(airr_file, line);
+  std::stringstream buffer(line);
+  while(getline(buffer, temp, '\t') ) {
+    if (temp == "cdr3_aa") {
+      column = idx;
+      break;
+    }
+    idx++;
+  }
+
+  if (column < 0) {
+    std::cerr << "Cannot find cdr3_aa column in AIRR TSV input file" << std::endl;
+    return airr_data;
+  }
+
+  // read values
+  while (getline(airr_file, line)) {
+    std::stringstream buffer(line);
+    std::vector<std::string> values;
+    while(getline(buffer, temp, '\t') ) {
+      values.push_back(temp);
+    }
+    airr_data.push_back(values[column]);
+  }
+  return airr_data;
+}
+
 std::array<std::array<float, 20>, 20> fmatrix_k1() {
   // Calculates the modified (normalized) blosum62 matrix
 
@@ -201,13 +237,17 @@ int main(int argc, char *argv[]) {
   int i_flag = -1;
   int t_flag = -1;
   int thresh_flag = -1;
+  int airr_flag = -1;
 
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "t:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "at:i:s:d:")) != -1) {
     switch (opt) {
     case 't':
       n_threads = std::stoi(optarg);
       t_flag = 1;
+      break;
+    case 'a':
+      airr_flag = 1;
       break;
     case 'i':
       in_file = optarg;
@@ -221,7 +261,7 @@ int main(int argc, char *argv[]) {
       iedb_file = optarg;
       break;
     default:
-      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -t num_threads -s "
+      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
                    "score_threshold -d /path/to/database"
                 << std::endl;
       return EXIT_FAILURE;
@@ -251,7 +291,6 @@ int main(int argc, char *argv[]) {
   }
 
   std::vector<std::string> iedb_data = read_IEDB_data(iedb_file);
-  std::ifstream file1(in_file);
   std::string line;
   std::string alphabet;
   std::vector<peptide> peplist1;
@@ -261,18 +300,38 @@ int main(int argc, char *argv[]) {
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
   k1 = fmatrix_k1();
-  while (getline(file1, line)) {
-    std::vector<int> int_vec;
-    for (int i = 0; i < line.length(); i++) {
-      if (alphabet.find(line[i]) == -1) {
-        std::cerr << "Invalid amino acid found in " << line << " at position "
-                  << i + 1 << std::endl;
-        return EXIT_FAILURE;
+  if (airr_flag == 1) {
+    // AIRR input format
+    std::vector<std::string> airr_data = read_AIRR_data(in_file);
+    if (airr_data.empty()) return EXIT_FAILURE;
+    for (std::vector<std::string>::iterator it = airr_data.begin();
+	 it != airr_data.end(); it++) {
+      std::vector<int> int_vec;
+      for (int i = 0; i < (*it).length(); i++) {
+	if (alphabet.find((*it)[i]) == -1) {
+	  std::cerr << "Invalid amino acid found in " << *it << " at position "
+		    << i + 1 << std::endl;
+	  return EXIT_FAILURE;
+	}
       }
+      peplist1.push_back({*it, int((*it).length()), -99.9, int_vec});
     }
-    peplist1.push_back({line, int(line.length()), -99.9, int_vec});
+  } else {
+    // text file input
+    std::ifstream file1(in_file);
+    while (getline(file1, line)) {
+      std::vector<int> int_vec;
+      for (int i = 0; i < line.length(); i++) {
+	if (alphabet.find(line[i]) == -1) {
+	  std::cerr << "Invalid amino acid found in " << line << " at position "
+		    << i + 1 << std::endl;
+	  return EXIT_FAILURE;
+	}
+      }
+      peplist1.push_back({line, int(line.length()), -99.9, int_vec});
+    }
+    file1.close();
   }
-  file1.close();
 
 // Calculate the normalization score (aff) (kernel 3 self vs self) list 1
 #pragma omp parallel for
