@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
   while ((opt = getopt(argc, argv, "t:i:s:d:")) != -1) {
     switch (opt) {
     case 't':
-      n_threads = atoi(optarg);
+      n_threads = std::stoi(optarg);
       t_flag = 1;
       break;
     case 'i':
@@ -227,15 +227,27 @@ int main(int argc, char *argv[]) {
       return EXIT_FAILURE;
     }
   }
-  // Check that required parameters are there
+  
+  // Check that required parameters are there + error correcting
   if (i_flag == -1 || t_flag == -1) {
     std::cerr << "Missing mandatory parameters" << std::endl
               << "Usage: ./tcrmatch -i infile_name.txt -t num_threads"
               << std::endl;
     return EXIT_FAILURE;
   }
+  if (n_threads < 1) {
+    std::cerr << "Number of threads cannot be less than one." << std::endl;
+    return EXIT_FAILURE;
+  }
   if (thresh_flag == -1) {
     threshold = .97;
+  }
+  if (t_flag == -1){
+    n_threads = 1;
+  }
+  if (threshold < 0 || threshold > 1) {
+    std::cerr << "Threshold must be between 0 and 1" << std::endl;
+    return EXIT_FAILURE;
   }
 
   std::vector<std::string> iedb_data = read_IEDB_data(iedb_file);
