@@ -1,6 +1,5 @@
 # TCRMatch
-### Maintainer: Austin Crinklaw
-#### Please open any issues on Github, or feel free to email acrinklaw(at)lji(dot)org with feedback or concerns
+#### Please open any issues on Github
 
 
 ## Requirements:
@@ -38,6 +37,7 @@ To generate the initial scores, please run
 - -t specifies the number of threads to use if operating on more than 1 core
 - -s optional parameter to specify the threshold (default is .97, in alignment with manuscript)
 - -d optional parameter to specify where the database is located, point this to a file of newline separated CDR3b sequences to test your own private set
+- -o optional parameter to specify where the output file should be written, default is output.csv
 
 To generate the output format which contains information regarding epitopes, receptor groups, antigens and source organisms, navigate to the "scripts" folder and run the process_output.py file.
 ```shell
@@ -53,7 +53,7 @@ This creates an archive folder in the top directory "data_archive" and moves the
 to data/IEDB_data.tsv.
 
 
-### Output  
+### Python Output
 -  Output file has 7 columns in TSV format. 
 -  First column is the user provided input sequence.  
 -  Second column contains a CDR3beta sequence from the IEDB scoring higher than the threshold

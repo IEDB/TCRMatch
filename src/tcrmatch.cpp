@@ -164,11 +164,15 @@ float k3_sum(peptide pep1, peptide pep2) {
 }
 
 void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
-                   float threshold) {
+                   float threshold, std::string output_fn) {
   // Simple method to calculate pairwise TCRMatch scores using two peptide
   // vectors
   std::vector<std::tuple<std::string, std::string, float>>
       results[omp_get_max_threads()];
+
+  std::ofstream out_filestream;
+  out_filestream.open(output_fn);
+
 #pragma omp parallel for
   for (int i = 0; i < peplist1.size(); i++) {
     for (int j = 0; j < peplist2.size(); j++) {
@@ -184,26 +188,27 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
   }
   for (int i = 0; i < omp_get_max_threads(); i++) {
     for (auto &tuple : results[i]) {
-      std::cout << std::fixed << std::setprecision(2) << std::get<0>(tuple)
-                << " " << std::get<1>(tuple) << " " << std::get<2>(tuple)
-                << std::endl;
+      out_filestream << std::fixed << std::setprecision(2) << std::get<0>(tuple)
+                     << "," << std::get<1>(tuple) << "," << std::get<2>(tuple)
+                     << std::endl;
     }
   }
+  out_filestream.close();
 }
 
-// Move this to outside -> import everything you need
 int main(int argc, char *argv[]) {
   int opt;
   int n_threads;
   float threshold;
   std::string in_file;
   std::string iedb_file = "data/IEDB_data.tsv";
+  std::string output_fn = "output.csv";
   int i_flag = -1;
   int t_flag = -1;
   int thresh_flag = -1;
 
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "t:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "t:i:s:d:o:")) != -1) {
     switch (opt) {
     case 't':
       n_threads = std::stoi(optarg);
@@ -220,19 +225,21 @@ int main(int argc, char *argv[]) {
     case 'd':
       iedb_file = optarg;
       break;
+    case 'o':
+      output_fn = optarg;
+      break;
     default:
       std::cerr << "Usage: ./tcrmatch -i infile_name.txt -t num_threads -s "
-                   "score_threshold -d /path/to/database"
+                   "score_threshold -d /path/to/database -o /path/to/output"
                 << std::endl;
       return EXIT_FAILURE;
     }
   }
-  
+
   // Check that required parameters are there + error correcting
-  if (i_flag == -1 || t_flag == -1) {
-    std::cerr << "Missing mandatory parameters" << std::endl
-              << "Usage: ./tcrmatch -i infile_name.txt -t num_threads"
-              << std::endl;
+  if (i_flag == -1) {
+    std::cerr << "Missing mandatory parameter input file" << std::endl
+              << "Usage: ./tcrmatch -i infile_name.txt" << std::endl;
     return EXIT_FAILURE;
   }
   if (n_threads < 1) {
@@ -242,7 +249,7 @@ int main(int argc, char *argv[]) {
   if (thresh_flag == -1) {
     threshold = .97;
   }
-  if (t_flag == -1){
+  if (t_flag == -1) {
     n_threads = 1;
   }
   if (threshold < 0 || threshold > 1) {
@@ -307,7 +314,7 @@ int main(int argc, char *argv[]) {
     }
     pep_ptr->aff = k3_sum(*pep_ptr, *pep_ptr);
   }
-  multi_calc_k3(peplist1, peplist2, threshold);
+  multi_calc_k3(peplist1, peplist2, threshold, output_fn);
 
   return 0;
 }
