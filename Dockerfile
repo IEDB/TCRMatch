@@ -1,11 +1,11 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
-ENV PACKAGES python3-dev python3-pip
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update && \
-    apt-get install -y ${PACKAGES} && \
-    apt-get clean
+RUN apt-get update
+RUN apt-get install -y git cmake g++ curl
 
-RUN mkdir /TCRMatch
-COPY . /TCRMatch
-RUN cd /TCRMatch && python3 setup.py install
+RUN git clone https://github.com/IEDB/TCRMatch.git
+RUN cd /TCRMatch/ && make
+RUN cd /TCRMatch/scripts && ./update.sh
