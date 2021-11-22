@@ -32,9 +32,10 @@ ASSQAGAYEQY
 
 To generate the initial scores, please run
 ```shell
-./tcrmatch -i input_file -t num_threads [-s threshold] [-d /path/to/database] > output_file
+./tcrmatch -i input_file -t num_threads [-s threshold] [-d /path/to/database] [-a] > output_file
 ```
 - -i specifies the path to the input file
+- -a specifies input file is in AIRR TSV format
 - -t specifies the number of threads to use if operating on more than 1 core
 - -s optional parameter to specify the threshold (default is .97, in alignment with manuscript)
 - -d optional parameter to specify where the database is located, point this to a file of newline separated CDR3b sequences to test your own private set
