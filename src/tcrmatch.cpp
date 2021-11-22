@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <math.h>
 #include <omp.h>
 #include <string>
@@ -95,7 +96,50 @@ std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
       iedb_data.push_back(sequence);
     }
   }
+
   return iedb_data;
+}
+
+struct IEDB_data_row {
+  std::string amino_acid_sequence;
+  std::string original_sequence;
+  std::string receptor_group;
+  std::string epitope;
+  std::string organism;
+  std::string antigen;
+};
+
+std::map<std::string, std::vector<IEDB_data_row>>
+create_IEDB_map(std::string IEDB_data_file) {
+  std::map<std::string, std::vector<IEDB_data_row>> iedb_map;
+  std::map<std::string, std::vector<IEDB_data_row>>::iterator it;
+  std::vector<IEDB_data_row> iedb_data;
+  std::ifstream iedb_file(IEDB_data_file);
+  IEDB_data_row input_row;
+  std::string line;
+  std::string temp;
+  int idx;
+
+  // read values
+  while (getline(iedb_file, line)) {
+    idx = 0;
+    std::stringstream buffer(line);
+    std::string values[6];
+    while (getline(buffer, temp, '\t')) {
+      values[idx] = temp;
+      idx++;
+    }
+    it = iedb_map.find(values[0]);
+    if (it != iedb_map.end()) {
+      iedb_map[values[0]].push_back(
+          {values[0], values[1], values[2], values[3], values[4], values[5]});
+    } else {
+      iedb_map[values[0]] = {
+          {values[0], values[1], values[2], values[3], values[4], values[5]}};
+    }
+  }
+
+  return iedb_map;
 }
 
 std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
@@ -109,7 +153,7 @@ std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
   idx = 0;
   std::getline(airr_file, line);
   std::stringstream buffer(line);
-  while(getline(buffer, temp, '\t') ) {
+  while (getline(buffer, temp, '\t')) {
     if (temp == "cdr3_aa") {
       column = idx;
       break;
@@ -118,7 +162,8 @@ std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
   }
 
   if (column < 0) {
-    std::cerr << "Cannot find cdr3_aa column in AIRR TSV input file" << std::endl;
+    std::cerr << "Cannot find cdr3_aa column in AIRR TSV input file"
+              << std::endl;
     return airr_data;
   }
 
@@ -126,7 +171,7 @@ std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
   while (getline(airr_file, line)) {
     std::stringstream buffer(line);
     std::vector<std::string> values;
-    while(getline(buffer, temp, '\t') ) {
+    while (getline(buffer, temp, '\t')) {
       values.push_back(temp);
     }
     airr_data.push_back(values[column]);
@@ -200,7 +245,9 @@ float k3_sum(peptide pep1, peptide pep2) {
 }
 
 void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
-                   float threshold) {
+                   float threshold,
+                   std::map<std::string, std::vector<IEDB_data_row>> iedb_map) {
+
   // Simple method to calculate pairwise TCRMatch scores using two peptide
   // vectors
   std::vector<std::tuple<std::string, std::string, float>>
@@ -208,6 +255,7 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
 #pragma omp parallel for
   for (int i = 0; i < peplist1.size(); i++) {
     for (int j = 0; j < peplist2.size(); j++) {
+
       peptide pep1 = peplist1[i];
       peptide pep2 = peplist2[j];
       float score = 0.0;
@@ -218,11 +266,24 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
       }
     }
   }
-  for (int i = 0; i < omp_get_max_threads(); i++) {
-    for (auto &tuple : results[i]) {
-      std::cout << std::fixed << std::setprecision(2) << std::get<0>(tuple)
-                << " " << std::get<1>(tuple) << " " << std::get<2>(tuple)
-                << std::endl;
+  std::cout << "input_sequence\tmatch_"
+               "sequence\tscore\treceptor_"
+               "group\tepitope\tantigen\torganism\t"
+            << std::endl;
+  for (int k = 0; k < omp_get_max_threads(); k++) {
+    for (auto &tuple : results[k]) {
+      std::string match_peptide = std::get<1>(tuple);
+      std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
+          iedb_map.find(match_peptide);
+      std::vector<IEDB_data_row> match_row_vec = it->second;
+      for (int l = 0; l < match_row_vec.size(); l++) {
+        IEDB_data_row match_row = match_row_vec[l];
+        std::cout << std::fixed << std::setprecision(2) << std::get<0>(tuple)
+                  << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
+                  << "\t" << match_row.receptor_group << "\t"
+                  << match_row.epitope << "\t" << match_row.antigen << "\t"
+                  << match_row.organism << std::endl;
+      }
     }
   }
 }
@@ -238,6 +299,9 @@ int main(int argc, char *argv[]) {
   int t_flag = -1;
   int thresh_flag = -1;
   int airr_flag = -1;
+
+  std::map<std::string, std::vector<IEDB_data_row>> iedb_map =
+      create_IEDB_map(iedb_file);
 
   // Command line argument parsing
   while ((opt = getopt(argc, argv, "at:i:s:d:")) != -1) {
@@ -267,7 +331,7 @@ int main(int argc, char *argv[]) {
       return EXIT_FAILURE;
     }
   }
-  
+
   // Check that required parameters are there + error correcting
   if (i_flag == -1 || t_flag == -1) {
     std::cerr << "Missing mandatory parameters" << std::endl
@@ -282,7 +346,7 @@ int main(int argc, char *argv[]) {
   if (thresh_flag == -1) {
     threshold = .97;
   }
-  if (t_flag == -1){
+  if (t_flag == -1) {
     n_threads = 1;
   }
   if (threshold < 0 || threshold > 1) {
@@ -291,6 +355,15 @@ int main(int argc, char *argv[]) {
   }
 
   std::vector<std::string> iedb_data = read_IEDB_data(iedb_file);
+  // Check if we didn't read any data into IEDB data
+  if (iedb_data.size() == 0) {
+    std::cout
+        << "Failed to read database file - please specify the path to database "
+           "file if not ./data/IEDB_data.tsv"
+        << std::endl;
+
+    return EXIT_FAILURE;
+  }
   std::string line;
   std::string alphabet;
   std::vector<peptide> peplist1;
@@ -303,16 +376,17 @@ int main(int argc, char *argv[]) {
   if (airr_flag == 1) {
     // AIRR input format
     std::vector<std::string> airr_data = read_AIRR_data(in_file);
-    if (airr_data.empty()) return EXIT_FAILURE;
+    if (airr_data.empty())
+      return EXIT_FAILURE;
     for (std::vector<std::string>::iterator it = airr_data.begin();
-	 it != airr_data.end(); it++) {
+         it != airr_data.end(); it++) {
       std::vector<int> int_vec;
       for (int i = 0; i < (*it).length(); i++) {
-	if (alphabet.find((*it)[i]) == -1) {
-	  std::cerr << "Invalid amino acid found in " << *it << " at position "
-		    << i + 1 << std::endl;
-	  return EXIT_FAILURE;
-	}
+        if (alphabet.find((*it)[i]) == -1) {
+          std::cerr << "Invalid amino acid found in " << *it << " at position "
+                    << i + 1 << std::endl;
+          return EXIT_FAILURE;
+        }
       }
       peplist1.push_back({*it, int((*it).length()), -99.9, int_vec});
     }
@@ -322,11 +396,11 @@ int main(int argc, char *argv[]) {
     while (getline(file1, line)) {
       std::vector<int> int_vec;
       for (int i = 0; i < line.length(); i++) {
-	if (alphabet.find(line[i]) == -1) {
-	  std::cerr << "Invalid amino acid found in " << line << " at position "
-		    << i + 1 << std::endl;
-	  return EXIT_FAILURE;
-	}
+        if (alphabet.find(line[i]) == -1) {
+          std::cerr << "Invalid amino acid found in " << line << " at position "
+                    << i + 1 << std::endl;
+          return EXIT_FAILURE;
+        }
       }
       peplist1.push_back({line, int(line.length()), -99.9, int_vec});
     }
@@ -366,7 +440,9 @@ int main(int argc, char *argv[]) {
     }
     pep_ptr->aff = k3_sum(*pep_ptr, *pep_ptr);
   }
-  multi_calc_k3(peplist1, peplist2, threshold);
+
+  // Calculate input data vs database with multi-threading
+  multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
 
   return 0;
 }
