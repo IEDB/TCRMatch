@@ -1,6 +1,6 @@
 # TCRMatch
-### Maintainer: Austin Crinklaw
-#### Please open any issues on Github, or feel free to email acrinklaw(at)lji(dot)org with feedback or concerns
+### Maintainer: Will Chronister, Austin Crinklaw
+#### Please open any issues on Github
 
 
 ## Requirements:
