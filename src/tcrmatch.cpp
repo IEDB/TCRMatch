@@ -285,7 +285,7 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
       std::vector<IEDB_data_row> match_row_vec = it->second;
       for (int l = 0; l < match_row_vec.size(); l++) {
         IEDB_data_row match_row = match_row_vec[l];
-        std::cout << std::fixed << std::setprecision(2) << std::get<0>(tuple)
+        std::cout << std::fixed << std::setprecision(4) << std::get<0>(tuple)
                   << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
                   << "\t" << match_row.receptor_group << "\t"
                   << match_row.epitope << "\t" << match_row.antigen << "\t"
