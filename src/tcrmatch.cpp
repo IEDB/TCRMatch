@@ -251,7 +251,7 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
 
   // Simple method to calculate pairwise TCRMatch scores using two peptide
   // vectors
-  std::vector<std::tuple<std::string, std::string, float, int>>::iterator it2;
+  std::vector<std::tuple<std::string, std::string, float, int>>::iterator it2[omp_get_max_threads()];
   std::vector<std::tuple<std::string, std::string, float, int>>
       results[omp_get_max_threads()];
 #pragma omp parallel for
@@ -266,8 +266,8 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
         // If input seq-match seq is unique, add tuple to results
         // Repeat IEDB matches are skipped (prevents duplicate rows in results) but duplicate input
         // sequences are permitted (e.g. for repertoires with identical TCRs)
-        it2 = find(results[tid].begin(), results[tid].end(), make_tuple(pep1.seq, pep2.seq, score, i));
-        if (it2 == results[tid].end()) {
+        it2[tid] = find(results[tid].begin(), results[tid].end(), make_tuple(pep1.seq, pep2.seq, score, i));
+        if (it2[tid] == results[tid].end()) {
           results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
         }
       }
