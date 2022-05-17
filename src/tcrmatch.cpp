@@ -82,8 +82,19 @@ struct peptide {
   std::string seq;
   int len;
   float aff;
-  std::vector<int> i;
+  std::vector<int> i; 
 };
+
+std::string trim( std::string line ){
+  
+  int last_idx = line.size() - 1;
+  
+  if ( line[0] == 'C' and ( line[last_idx] == 'F' or line[last_idx] == 'W' ) )
+    return line.substr(1,last_idx-1);
+  else
+    return line;
+}
+
 
 std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
   std::vector<std::string> iedb_data;
@@ -306,9 +317,9 @@ int main(int argc, char *argv[]) {
   int t_flag = -1;
   int thresh_flag = -1;
   int airr_flag = -1;
-
+  int trimming = true;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "at:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "akt:i:s:d:")) != -1) {
     switch (opt) {
     case 't':
       n_threads = std::stoi(optarg);
@@ -328,6 +339,10 @@ int main(int argc, char *argv[]) {
     case 'd':
       iedb_file = optarg;
       break;
+    case 'k':
+      trimming = false;
+      break;
+
     default:
       std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
                    "score_threshold -d /path/to/database"
@@ -409,6 +424,11 @@ int main(int argc, char *argv[]) {
           return EXIT_FAILURE;
         }
       }
+      if( trimming ) 
+        // std::cout <<line <<'\t';
+        line = trim( line ); // this will only work for text file input, not for AIRR data. Must be processed afterwards.
+        // std::cout <<line <<std::endl;
+
       peplist1.push_back({line, int(line.length()), -99.9, int_vec});
     }
     file1.close();
