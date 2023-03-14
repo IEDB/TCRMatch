@@ -1,5 +1,4 @@
 # TCRMatch
-### Maintainer: Will Chronister, Austin Crinklaw
 #### Please open any issues on Github
 
 
