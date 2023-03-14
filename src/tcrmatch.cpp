@@ -1,3 +1,5 @@
+#define VERSION "1.0.3"
+
 #include <array>
 #include <fstream>
 #include <iomanip>
@@ -319,7 +321,7 @@ int main(int argc, char *argv[]) {
   int airr_flag = -1;
   int trimming = true;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "akt:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "akvt:i:s:d:")) != -1) {
     switch (opt) {
     case 't':
       n_threads = std::stoi(optarg);
@@ -342,6 +344,9 @@ int main(int argc, char *argv[]) {
     case 'k':
       trimming = false;
       break;
+    case 'v':
+      std::cout << VERSION << std::endl;
+      return 0;
 
     default:
       std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
