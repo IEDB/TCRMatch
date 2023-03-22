@@ -13,6 +13,14 @@
 #include <vector>
 #include <algorithm>
 
+std::string get_nth_field( std::string& str, int n ){
+	std::istringstream iss(str);
+	std::string field;
+	for (int i = 0; i <= n; i++)
+		iss >>field;
+	return field;
+}
+
 std::array<std::array<float, 20>, 20> k1;
 int p_kmin = 1;
 int p_kmax = 30;
@@ -84,7 +92,7 @@ struct peptide {
   std::string seq;
   int len;
   float aff;
-  std::vector<int> i; 
+  std::vector<int> i;
 };
 
 std::string trim( std::string line ){
@@ -258,7 +266,7 @@ float k3_sum(peptide pep1, peptide pep2) {
   return (k3);
 }
 
-void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
+std::vector<std::string> multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
                    float threshold,
                    std::map<std::string, std::vector<IEDB_data_row>> iedb_map) {
 
@@ -286,26 +294,39 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
       }
     }
   }
-  std::cout << "input_sequence\tmatch_"
-               "sequence\tscore\treceptor_"
-               "group\tepitope\tantigen\torganism\t"
-            << std::endl;
+//   std::cout << "input_sequence\tmatch_"
+//                "sequence\tscore\treceptor_"
+//                "group\tepitope\tantigen\torganism\t"
+//             << std::endl;
+
+  std::vector<std::string> tcrmatch_output;
+
   for (int k = 0; k < omp_get_max_threads(); k++) {
     for (auto &tuple : results[k]) {
       std::string match_peptide = std::get<1>(tuple);
       std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
           iedb_map.find(match_peptide);
       std::vector<IEDB_data_row> match_row_vec = it->second;
+  
       for (int l = 0; l < match_row_vec.size(); l++) {
         IEDB_data_row match_row = match_row_vec[l];
-        std::cout << std::fixed << std::setprecision(4) << std::get<0>(tuple)
-                  << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
-                  << "\t" << match_row.receptor_group << "\t"
-                  << match_row.epitope << "\t" << match_row.antigen << "\t"
-                  << match_row.organism << std::endl;
+      //   std::cout << std::fixed << std::setprecision(4) << std::get<0>(tuple)
+      //             << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
+      //             << "\t" << match_row.receptor_group << "\t"
+      //             << match_row.epitope << "\t" << match_row.antigen << "\t"
+      //             << match_row.organism << std::endl;
+        std::string score = std::to_string(std::get<2>(tuple));
+        std::string output_string = std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score
+                    + "\t" + match_row.receptor_group + "\t"
+                    + match_row.epitope + "\t" + match_row.antigen + "\t"
+                    + match_row.organism + "\n";
+
+        tcrmatch_output.push_back(output_string);
+
       }
     }
   }
+  return tcrmatch_output;
 }
 
 // Move this to outside -> import everything you need
@@ -319,39 +340,42 @@ int main(int argc, char *argv[]) {
   int t_flag = -1;
   int thresh_flag = -1;
   int airr_flag = -1;
-  int trimming = true;
+  bool trimming = true;
+  bool trust4flag = false;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "akvt:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "rakvt:i:s:d:")) != -1) {
     switch (opt) {
-    case 't':
-      n_threads = std::stoi(optarg);
-      t_flag = 1;
-      break;
-    case 'a':
-      airr_flag = 1;
-      break;
-    case 'i':
-      in_file = optarg;
-      i_flag = 1;
-      break;
-    case 's':
-      threshold = std::stof(optarg);
-      thresh_flag = 1;
-      break;
-    case 'd':
-      iedb_file = optarg;
-      break;
-    case 'k':
-      trimming = false;
-      break;
-    case 'v':
-      std::cout << VERSION << std::endl;
-      return 0;
-
-    default:
-      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
-                   "score_threshold -d /path/to/database"
-                << std::endl;
+      case 't':
+        n_threads = std::stoi(optarg);
+        t_flag = 1;
+        break;
+      case 'a':
+        airr_flag = 1;
+        break;
+      case 'i':
+        in_file = optarg;
+        i_flag = 1;
+        break;
+      case 's':
+        threshold = std::stof(optarg);
+        thresh_flag = 1;
+        break;
+      case 'd':
+        iedb_file = optarg;
+        break;
+      case 'k':
+        trimming = false;
+        break;
+      case 'r':
+        trust4flag = true;
+        break;
+      case 'v':
+        std::cout << VERSION << std::endl;
+        return 0;
+      default:
+        std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
+                    "score_threshold -d /path/to/database -k -r"
+                  << std::endl;
       return EXIT_FAILURE;
     }
   }
@@ -392,10 +416,12 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
   std::string line;
+  std::string seq;
   std::string alphabet;
   std::vector<peptide> peplist1;
   std::vector<peptide> peplist2;
-
+  std::vector<std::string> inputlines;  
+  std::string trust4header;
   omp_set_num_threads(n_threads);
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
@@ -417,7 +443,56 @@ int main(int argc, char *argv[]) {
       }
       peplist1.push_back({*it, int((*it).length()), -99.9, int_vec});
     }
-  } else {
+  } 
+  
+  else if( trust4flag ){
+	
+    // text file input
+    std::ifstream file1(in_file);
+
+	
+    getline(file1, trust4header); // skips header 
+    std::string valid_header = "#count\tfrequency\tCDR3nt\tCDR3aa\tV\tD\tJ\tC\tcid\tcid_full_length";
+    
+    // Checking if TRUST4 file is correctly formatted
+    if ( trust4header != valid_header )
+    {
+      std::cerr <<"ERROR: Invalid TRUST4 header. Please check input file format." <<std::endl ;
+      std::cerr <<"Input file: " + in_file <<std::endl ;
+      exit(1);
+    }
+
+    while (getline(file1, line)) {
+	    inputlines.push_back( line );
+
+      std::istringstream is( line );
+      std::string skip;
+      is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
+      std::vector<int> int_vec;
+      bool invalid_char_found = false;
+
+      for (int i = 0; i < seq.length(); i++) {
+        if (alphabet.find(seq[i]) == -1) {
+          // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
+          invalid_char_found = true;
+          break;
+        }
+      }
+
+      if( invalid_char_found ) {
+        std::cerr << "Invalid amino acid found in " << seq <<std::endl;
+        std::cerr <<"Skipping" <<std::endl;
+        continue;
+      }
+
+      if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
+        seq = trim( seq );
+
+      peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
+    }
+    file1.close();
+  }
+  else {
     // text file input
     std::ifstream file1(in_file);
     while (getline(file1, line)) {
@@ -474,7 +549,45 @@ int main(int argc, char *argv[]) {
   }
 
   // Calculate input data vs database with multi-threading
-  multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
+  std::vector<std::string> extended_output;
+  std::vector<std::string> tcrmatch_output = multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
 
+  std::string tcrmatch_output_header;
+  std::string was_trimmed;
+  if( trimming )
+    was_trimmed = "trimmed_";
+  else 
+    was_trimmed = "";
+
+  tcrmatch_output_header = was_trimmed + "input_sequence\tmatch_sequence\tscore\treceptor_group\tepitope\tantigen\torganism" ;
+
+  if( trust4flag == true ){
+    std::cout << trust4header <<"\t";
+    std::cout << tcrmatch_output_header << std::endl; 
+
+    // Appending TCRmatch to Trust4 output
+    for( int i = 0; i < inputlines.size(); i++)
+      for( int j = 0; j < tcrmatch_output.size(); j++) {
+        std::string final_line = inputlines[i] + "\t" + tcrmatch_output[j];
+        std::string AAseq_trust  = get_nth_field(inputlines[i], 3);
+        std::string seq_tcrmatch = get_nth_field(tcrmatch_output[j], 0);
+        // std::cout << (trim(AAseq_trust) == seq_tcrmatch) <<std::endl;
+        if( trim(AAseq_trust) == seq_tcrmatch )
+          extended_output.push_back( final_line );
+    }
+
+
+    for( int i = 0; i < extended_output.size(); i++)
+      std::cout <<extended_output[i];
+  }
+
+  // #Change from 'input_sequence' to 'trimmed_input_sequence' if trimmed
+
+  else {
+    std::cout << tcrmatch_output_header << std::endl;
+    
+    for( int j = 0; j < tcrmatch_output.size(); j++) 
+      std::cout<< tcrmatch_output[j];
+  }
   return 0;
 }
