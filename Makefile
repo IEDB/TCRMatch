@@ -3,8 +3,8 @@ CFLAGS = -fopenmp -O3 -g
 
 all: tcrmatch
 
-tcrmatch: src/tcrmatch.cpp
-	$(CC) $(CFLAGS) -o tcrmatch src/tcrmatch.cpp
+tcrmatch: src/main.cpp
+	$(CC) $(CFLAGS) -o tcrmatch src/main.cpp
 
 clean:
 	rm tcrmatch
