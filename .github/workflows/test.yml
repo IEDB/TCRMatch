@@ -12,4 +12,4 @@ jobs:
     - name: Build
       run: g++ -o test tests/test.cpp tests/catch_amalgamated.cpp -fopenmp
     - name: Run tests
-      run: ./tests
+      run: ./tests/test
