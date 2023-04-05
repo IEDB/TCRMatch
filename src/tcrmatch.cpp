@@ -1,5 +1,6 @@
 #define VERSION "1.0.3"
 
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iomanip>
@@ -11,20 +12,27 @@
 #include <tuple>
 #include <unistd.h>
 #include <vector>
-#include <algorithm>
 
-std::string get_nth_field( std::string& str, int n ){
-	std::istringstream iss(str);
-	std::string field;
-	for (int i = 0; i <= n; i++)
-		iss >>field;
-	return field;
+std::string get_nth_field(std::string &str, int n) {
+  /**
+   * Get the nth field of a string
+   *
+   * @param str: string to parse
+   * @param n: field number to return
+   * @return: nth field of the string
+   */
+  std::istringstream iss(str);
+  std::string field;
+  for (int i = 0; i <= n; i++)
+    iss >> field;
+  return field;
 }
 
 std::array<std::array<float, 20>, 20> k1;
-int p_kmin = 1;
-int p_kmax = 30;
-float p_beta = 0.11387;
+int P_KMIN = 1;
+int P_KMAX = 30;
+float P_BETA = 0.11387;
+
 // Hardcoded because parsing + computing matrix is annoying
 float blm_qij[20][20] = {
     {0.0215, 0.0023, 0.0019, 0.0022, 0.0016, 0.0019, 0.003,
@@ -95,18 +103,28 @@ struct peptide {
   std::vector<int> i;
 };
 
-std::string trim( std::string line ){
-  
+std::string trim(std::string line) {
+  /**
+   * Trim the sequence from the IEDB data file
+   *
+   * @param line: line from IEDB data file
+   * @return: trimmed sequence
+   */
   int last_idx = line.size() - 1;
-  
-  if ( line[0] == 'C' and ( line[last_idx] == 'F' or line[last_idx] == 'W' ) )
-    return line.substr(1,last_idx-1);
+
+  if (line[0] == 'C' and (line[last_idx] == 'F' or line[last_idx] == 'W'))
+    return line.substr(1, last_idx - 1);
   else
     return line;
 }
 
-
 std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
+  /**
+   * Read the IEDB data file
+   *
+   * @param IEDB_data_file: path to IEDB data file
+   * @return: vector of trimmed sequences
+   */
   std::vector<std::string> iedb_data;
   std::ifstream iedb_file(IEDB_data_file);
   std::string line;
@@ -133,6 +151,12 @@ struct IEDB_data_row {
 
 std::map<std::string, std::vector<IEDB_data_row>>
 create_IEDB_map(std::string IEDB_data_file) {
+  /**
+   * Create a map of IEDB data
+   *
+   * @param IEDB_data_file: path to IEDB data file
+   * @return: map of IEDB data
+   */
   std::map<std::string, std::vector<IEDB_data_row>> iedb_map;
   std::map<std::string, std::vector<IEDB_data_row>>::iterator it;
   std::vector<IEDB_data_row> iedb_data;
@@ -165,6 +189,12 @@ create_IEDB_map(std::string IEDB_data_file) {
 }
 
 std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
+  /**
+   * Read the AIRR data file
+   *
+   * @param AIRR_data_file: path to AIRR data file
+   * @return: vector of CDR3 sequences
+   */
   std::vector<std::string> airr_data;
   std::ifstream airr_file(AIRR_data_file);
   std::string line;
@@ -202,8 +232,11 @@ std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
 }
 
 std::array<std::array<float, 20>, 20> fmatrix_k1() {
-  // Calculates the modified (normalized) blosum62 matrix
-
+  /**
+   * Calculate K1 matrix
+   *
+   * @return: K1 matrix
+   */
   int k, j;
   float marg[20];
   float sum;
@@ -229,7 +262,7 @@ std::array<std::array<float, 20>, 20> fmatrix_k1() {
   for (j = 0; j < 20; j++) {
     for (k = 0; k < 20; k++) {
       k1[j][k] = blm_qij[j][k] / (marg[j] * marg[k]);
-      k1[j][k] = pow(k1[j][k], p_beta);
+      k1[j][k] = pow(k1[j][k], P_BETA);
     }
   }
 
@@ -237,14 +270,20 @@ std::array<std::array<float, 20>, 20> fmatrix_k1() {
 }
 
 float k3_sum(peptide pep1, peptide pep2) {
-  // Recursively calculate Kernel 3 using Kernel 1 lookups
+  /**
+   * Recursively calculate K3 sum
+   *
+   * @param pep1: peptide 1
+   * @param pep2: peptide 2
+   * @return: K3 sum
+   */
   float k2, term, k3 = 0.0;
   int start1, start2;
   int k, j1, j2;
 
   float k2_prod_save[31][31][31];
 
-  for (k = p_kmin; k <= p_kmax; k++) {
+  for (k = P_KMIN; k <= P_KMAX; k++) {
     for (start1 = 0; start1 <= pep1.len - k; start1++) {
       for (start2 = 0; start2 <= pep2.len - k; start2++) {
 
@@ -266,15 +305,24 @@ float k3_sum(peptide pep1, peptide pep2) {
   return (k3);
 }
 
-std::vector<std::string> multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
-                   float threshold,
-                   std::map<std::string, std::vector<IEDB_data_row>> iedb_map) {
-
-  // Simple method to calculate pairwise TCRMatch scores using two peptide
-  // vectors
-  std::vector<std::tuple<std::string, std::string, float, int>>::iterator it2[omp_get_max_threads()];
+std::vector<std::string>
+multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
+              float threshold,
+              std::map<std::string, std::vector<IEDB_data_row>> iedb_map) {
+  /**
+   * Calculate K3 for all peptides in peplist1 and peplist2
+   *
+   * @param peplist1: peptide list 1
+   * @param peplist2: peptide list 2
+   * @param threshold: K3 threshold
+   * @param iedb_map: IEDB map
+   * @return: vector of matching CDR3 sequences
+   */
+  std::vector<std::tuple<std::string, std::string, float, int>>::iterator
+      it2[omp_get_max_threads()];
   std::vector<std::tuple<std::string, std::string, float, int>>
       results[omp_get_max_threads()];
+
 #pragma omp parallel for
   for (int i = 0; i < peplist1.size(); i++) {
     for (int j = 0; j < peplist2.size(); j++) {
@@ -285,19 +333,21 @@ std::vector<std::string> multi_calc_k3(std::vector<peptide> peplist1, std::vecto
       if (score > threshold) {
         int tid = omp_get_thread_num();
         // If input seq-match seq is unique, add tuple to results
-        // Repeat IEDB matches are skipped (prevents duplicate rows in results) but duplicate input
-        // sequences are permitted (e.g. for repertoires with identical TCRs)
-        it2[tid] = find(results[tid].begin(), results[tid].end(), make_tuple(pep1.seq, pep2.seq, score, i));
+        // Repeat IEDB matches are skipped (prevents duplicate rows in results)
+        // but duplicate input sequences are permitted (e.g. for repertoires
+        // with identical TCRs)
+        it2[tid] = find(results[tid].begin(), results[tid].end(),
+                        make_tuple(pep1.seq, pep2.seq, score, i));
         if (it2[tid] == results[tid].end()) {
           results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
         }
       }
     }
   }
-//   std::cout << "input_sequence\tmatch_"
-//                "sequence\tscore\treceptor_"
-//                "group\tepitope\tantigen\torganism\t"
-//             << std::endl;
+  //   std::cout << "input_sequence\tmatch_"
+  //                "sequence\tscore\treceptor_"
+  //                "group\tepitope\tantigen\torganism\t"
+  //             << std::endl;
 
   std::vector<std::string> tcrmatch_output;
 
@@ -307,22 +357,23 @@ std::vector<std::string> multi_calc_k3(std::vector<peptide> peplist1, std::vecto
       std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
           iedb_map.find(match_peptide);
       std::vector<IEDB_data_row> match_row_vec = it->second;
-  
+
       for (int l = 0; l < match_row_vec.size(); l++) {
         IEDB_data_row match_row = match_row_vec[l];
-      //   std::cout << std::fixed << std::setprecision(4) << std::get<0>(tuple)
-      //             << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
-      //             << "\t" << match_row.receptor_group << "\t"
-      //             << match_row.epitope << "\t" << match_row.antigen << "\t"
-      //             << match_row.organism << std::endl;
+        //   std::cout << std::fixed << std::setprecision(4) <<
+        //   std::get<0>(tuple)
+        //             << "\t" << std::get<1>(tuple) << "\t" <<
+        //             std::get<2>(tuple)
+        //             << "\t" << match_row.receptor_group << "\t"
+        //             << match_row.epitope << "\t" << match_row.antigen << "\t"
+        //             << match_row.organism << std::endl;
         std::string score = std::to_string(std::get<2>(tuple));
-        std::string output_string = std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score
-                    + "\t" + match_row.receptor_group + "\t"
-                    + match_row.epitope + "\t" + match_row.antigen + "\t"
-                    + match_row.organism + "\n";
+        std::string output_string =
+            std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score +
+            "\t" + match_row.receptor_group + "\t" + match_row.epitope + "\t" +
+            match_row.antigen + "\t" + match_row.organism + "\n";
 
         tcrmatch_output.push_back(output_string);
-
       }
     }
   }
