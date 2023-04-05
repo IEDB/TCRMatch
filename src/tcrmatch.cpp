@@ -286,7 +286,6 @@ float k3_sum(peptide pep1, peptide pep2) {
   for (k = P_KMIN; k <= P_KMAX; k++) {
     for (start1 = 0; start1 <= pep1.len - k; start1++) {
       for (start2 = 0; start2 <= pep2.len - k; start2++) {
-
         j1 = pep1.i[start1 + k - 1];
         j2 = pep2.i[start2 + k - 1];
         term = k1[j1][j2];
