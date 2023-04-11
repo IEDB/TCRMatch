@@ -21,7 +21,11 @@ std::string get_nth_field( std::string& str, int n ){
 	return field;
 }
 
-std::array<std::array<float, 20>, 20> k1;
+// std::array<std::array<float, 20>, 20> k1;
+// float k1[20][20];
+float **k1; 
+
+
 int p_kmin = 1;
 int p_kmax = 30;
 float p_beta = 0.11387;
@@ -94,6 +98,14 @@ struct peptide {
   float aff;
   std::vector<int> i;
 };
+
+void allocate( ){
+  k1 = new float* [20];  //first allocate array of row pointers
+  for( int i=0 ; i < 20 ; i++ )
+    k1[i] = new float[20]; // allocate memory for columns in each row
+
+}
+
 
 std::string trim( std::string line ){
   
@@ -201,7 +213,8 @@ std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
   return airr_data;
 }
 
-std::array<std::array<float, 20>, 20> fmatrix_k1() {
+// std::array<std::array<float, 20>, 20> fmatrix_k1() {
+float** fmatrix_k1() {
   // Calculates the modified (normalized) blosum62 matrix
 
   int k, j;
@@ -425,6 +438,7 @@ int main(int argc, char *argv[]) {
   omp_set_num_threads(n_threads);
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
+  allocate();
   k1 = fmatrix_k1();
   if (airr_flag == 1) {
     // AIRR input format
