@@ -12,6 +12,8 @@
 #include <tuple>
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
+#include <sstream>
 
 std::string get_nth_field(std::string &str, int n) {
   /**
