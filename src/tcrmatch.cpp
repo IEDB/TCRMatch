@@ -453,6 +453,11 @@ int main(int argc, char *argv[]) {
 
 	
     getline(file1, trust4header); // skips header 
+    
+    if (trust4header.back() == '\n' || trust4header.back() == '\r') 
+        trust4header.erase(trust4header.find_last_of("\r\n"));
+    
+    
     std::string valid_header = "#count\tfrequency\tCDR3nt\tCDR3aa\tV\tD\tJ\tC\tcid\tcid_full_length";
     
     // Checking if TRUST4 file is correctly formatted
@@ -462,7 +467,7 @@ int main(int argc, char *argv[]) {
       std::cerr <<"Input file: " + in_file <<std::endl ;
       exit(1);
     }
-
+    
     while (getline(file1, line)) {
 	    inputlines.push_back( line );
 
