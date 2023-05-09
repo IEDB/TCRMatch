@@ -14,6 +14,16 @@
 #include <algorithm>
 #include <sstream>
 
+
+#include <string>
+
+void erase_newline( std::string& str ) 
+{
+	if (str.back() == '\n' || str.back() == '\r') 
+		str.erase(str.find_last_of("\r\n"));
+}
+
+
 std::string get_nth_field( std::string& str, int n ){
 	std::istringstream iss(str);
 	std::string field;
@@ -454,10 +464,10 @@ int main(int argc, char *argv[]) {
 	
     getline(file1, trust4header); // skips header 
     
-    if (trust4header.back() == '\n' || trust4header.back() == '\r') 
-        trust4header.erase(trust4header.find_last_of("\r\n"));
-    
-    
+    // std::cout<< trust4header <<std::endl;
+    erase_newline( trust4header );
+    // std::cout<< trust4header <<std::endl;
+	// exit(0);
     std::string valid_header = "#count\tfrequency\tCDR3nt\tCDR3aa\tV\tD\tJ\tC\tcid\tcid_full_length";
     
     // Checking if TRUST4 file is correctly formatted
@@ -469,6 +479,7 @@ int main(int argc, char *argv[]) {
     }
     
     while (getline(file1, line)) {
+		erase_newline( line );
 	    inputlines.push_back( line );
 
       std::istringstream is( line );
