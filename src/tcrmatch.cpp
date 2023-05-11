@@ -15,35 +15,6 @@
 #include <algorithm>
 #include <sstream>
 
-void erase_newline( std::string& str ) 
-{
-  /**
-   * Removes newline characters (\rn \n)
-   * to avoid conflicts of inputs from
-   * windows vs unix systems
-   *
-   * @param str: line from input file
-   */  
-  
-	if (str.back() == '\n' || str.back() == '\r') 
-		str.erase(str.find_last_of("\r\n"));
-}
-
-
-std::string get_nth_field(std::string &str, int n) {
-  /**
-   * Get the nth field of a string
-   *
-   * @param str: string to parse
-   * @param n: field number to return
-   * @return: nth field of the string
-   */
-  std::istringstream iss(str);
-  std::string field;
-  for (int i = 0; i <= n; i++)
-    iss >> field;
-  return field;
-}
 
 std::array<std::array<float, 20>, 20> k1;
 int P_KMIN = 1;
