@@ -1,4 +1,4 @@
-#define VERSION "1.0.3"
+#define VERSION "1.1.0"
 
 #include <algorithm>
 #include <array>
