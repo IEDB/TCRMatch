@@ -122,6 +122,8 @@ int main(int argc, char *argv[]) {
 
 	
     getline(file1, trust4header); // skips header 
+    erase_newline( trust4header );
+
     std::string valid_header = "#count\tfrequency\tCDR3nt\tCDR3aa\tV\tD\tJ\tC\tcid\tcid_full_length";
     
     // Checking if TRUST4 file is correctly formatted
@@ -133,6 +135,7 @@ int main(int argc, char *argv[]) {
     }
 
     while (getline(file1, line)) {
+  		erase_newline( line );
 	    inputlines.push_back( line );
 
       std::istringstream is( line );
