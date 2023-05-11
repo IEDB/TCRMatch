@@ -15,6 +15,21 @@
 #include <algorithm>
 #include <sstream>
 
+void erase_newline( std::string& str ) 
+{
+  /**
+   * Removes newline characters (\rn \n)
+   * to avoid conflicts of inputs from
+   * windows vs unix systems
+   *
+   * @param str: line from input file
+   */  
+  
+	if (str.back() == '\n' || str.back() == '\r') 
+		str.erase(str.find_last_of("\r\n"));
+}
+
+
 std::string get_nth_field(std::string &str, int n) {
   /**
    * Get the nth field of a string
