@@ -146,41 +146,44 @@ void parse_trust4_input( vector<peptide>& peplist, string const& in_file, vector
 	while ( getline(file1, line) ) 
 	{
 		erase_newline( line );
-		
-		inputlines.push_back( line );
 
-		std::istringstream is( line );
-		std::string skip;
-		is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
-		std::vector<int> int_vec;
-		bool invalid_char_found = false;
-
-		for (int i = 0; i < seq.length(); i++) 
+		if( is_TCR_gene(line) )
 		{
-			if (valid_residues.find(seq[i]) == -1) {
-			// return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
-			invalid_char_found = true; 
-			break;
+			inputlines.push_back( line );
+
+			bool invalid_char_found = false;
+
+			std::istringstream is( line );
+			std::string skip;
+			is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
+
+			for (int i = 0; i < seq.length(); i++) 
+				if (valid_residues.find(seq[i]) == -1) 
+				{
+					// return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
+					invalid_char_found = true; 
+					break;
+				}
+			
+			if( invalid_char_found ) 
+			{
+				cerr << "Invalid amino acid found in " << seq <<endl;
+				cerr << "Skipping" <<endl;
+				continue;
 			}
+
+			std::vector<int> int_vec;
+			peptide p_aux = {seq, int(seq.length()), -99.9, int_vec};
+			
+			if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
+				trim_flanking_residues( p_aux );
+
+			peplist.push_back( p_aux );
 		}
-
-		if( invalid_char_found ) 
-		{
-			cerr << "Invalid amino acid found in " << seq <<endl;
-			cerr << "Skipping" <<endl;
-			continue;
-		}
-
-		peptide p_aux = {seq, int(seq.length()), -99.9, int_vec};
-		if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
-			trim_flanking_residues( p_aux );
-
-		peplist.push_back( p_aux );
-    }
 
     file1.close();
+	}
 }
-
 // -------------------------------------------------------
 // int main()
 // {
