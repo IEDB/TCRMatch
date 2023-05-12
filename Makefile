@@ -8,4 +8,4 @@ tcrmatch: src/main.cpp src/tcrmatch.cpp
 
 clean:
 	rm tcrmatch
-	rm test
+
