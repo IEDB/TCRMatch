@@ -1,3 +1,5 @@
+#define VERSION "1.1.1"
+
 #include "tcrmatch.cpp"
 
 int main(int argc, char *argv[]) {

@@ -1,5 +1,3 @@
-#define VERSION "1.1.0"
-
 #include <algorithm>
 #include <array>
 #include <fstream>
