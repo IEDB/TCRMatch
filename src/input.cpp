@@ -181,8 +181,8 @@ void parse_trust4_input( vector<peptide>& peplist, string const& in_file, vector
 			peplist.push_back( p_aux );
 		}
 
-    file1.close();
 	}
+    file1.close();
 }
 // -------------------------------------------------------
 // int main()

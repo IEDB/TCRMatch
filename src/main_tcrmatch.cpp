@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   // print_matrix(k1);
   // Parse database file
   std::vector<peptide> peplist2 = iedb_data_to_peplist( iedb_data );
-
+  
   // std::cout <<peplist1[0].aff <<std::endl;  
   calc_selfmatch_score( peplist1, k1 );
 
