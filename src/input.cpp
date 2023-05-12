@@ -103,6 +103,33 @@ void parse_airr_input( vector<peptide>& peplist, string const& in_file, bool tri
 } 
 
 // ---------------------------------------------------------------------
+bool is_TCR_gene( std::string& str )
+{
+  /**
+   * Checks if any of the VDJ fields
+   * of the TRUST4 input file is a
+   * gene for TCR (TR)
+   *
+   * @param str: line from input file
+   * @return bool: true if is a gene for immunoglobulin
+   */  
+
+  std::istringstream iss( str );
+  std::string field;
+  
+  for (int i = 0; i <= 6; i++)
+  {
+    iss >> field;
+
+    if( i == 4 or i == 5 or i == 6)
+      if( field.substr(0, 3) == "TRB" )
+        return true;
+  }
+
+  return false;
+}
+
+// ---------------------------------------------------------------------
 void parse_trust4_input( vector<peptide>& peplist, string const& in_file, vector<string>& inputlines, bool trimming )
 {
 	std::string trust4header;
@@ -118,6 +145,8 @@ void parse_trust4_input( vector<peptide>& peplist, string const& in_file, vector
     
 	while ( getline(file1, line) ) 
 	{
+		erase_newline( line );
+		
 		inputlines.push_back( line );
 
 		std::istringstream is( line );
