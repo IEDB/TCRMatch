@@ -135,36 +135,43 @@ int main(int argc, char *argv[]) {
     }
 
     while (getline(file1, line)) {
-  		erase_newline( line );
-	    inputlines.push_back( line );
+  		
+      erase_newline( line );
+      
+      if( is_TCR_gene(line) )
+      {
+      
+        inputlines.push_back( line );
 
-      std::istringstream is( line );
-      std::string skip;
-      is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
-      std::vector<int> int_vec;
-      bool invalid_char_found = false;
+        std::istringstream is( line );
+        std::string skip;
+        is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
+        std::vector<int> int_vec;
+        bool invalid_char_found = false;
 
-      for (int i = 0; i < seq.length(); i++) {
-        if (alphabet.find(seq[i]) == -1) {
-          // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
-          invalid_char_found = true;
-          break;
+        for (int i = 0; i < seq.length(); i++) {
+          if (alphabet.find(seq[i]) == -1) {
+            // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
+            invalid_char_found = true;
+            break;
+          }
         }
+
+        if( invalid_char_found ) {
+          std::cerr << "Invalid amino acid found in " << seq <<std::endl;
+          std::cerr <<"Skipping" <<std::endl;
+          continue;
+        }
+
+        if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
+          seq = trim( seq );
+
+        peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
       }
-
-      if( invalid_char_found ) {
-        std::cerr << "Invalid amino acid found in " << seq <<std::endl;
-        std::cerr <<"Skipping" <<std::endl;
-        continue;
-      }
-
-      if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
-        seq = trim( seq );
-
-      peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
     }
     file1.close();
   }
+
   else {
     // text file input
     std::ifstream file1(in_file);

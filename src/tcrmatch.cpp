@@ -15,6 +15,34 @@
 #include <algorithm>
 #include <sstream>
 
+bool is_TCR_gene( std::string& str )
+{
+  /**
+   * Checks if any of the VDJ fields
+   * of the TRUST4 input file is a
+   * gene for TCR (TR)
+   *
+   * @param str: line from input file
+   * @return bool: true if is a gene for immunoglobulin
+   */  
+
+  std::istringstream iss( str );
+  std::string field;
+  
+  for (int i = 0; i <= 6; i++)
+  {
+    iss >> field;
+
+    if( i == 4 or i == 5 or i == 6)
+      if( field.substr(0, 3) == "TRB" )
+        return true;
+  }
+
+  return false;
+}
+
+
+
 void erase_newline( std::string& str ) 
 {
   /**
