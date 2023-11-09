@@ -106,13 +106,19 @@ int main(int argc, char *argv[]) {
     for (std::vector<std::string>::iterator it = airr_data.begin();
          it != airr_data.end(); it++) {
       std::vector<int> int_vec;
+      bool invalid_residue = false;
+
       for (int i = 0; i < (*it).length(); i++) {
-        if (alphabet.find((*it)[i]) == -1) {
+         if (alphabet.find((*it)[i]) == -1) {
           std::cerr << "Invalid amino acid found in " << *it << " at position "
-                    << i + 1 << std::endl;
-          return EXIT_FAILURE;
+                    << i + 1 <<". Skipping." << std::endl;
+            invalid_residue = true;
+            break;
+        //   return EXIT_FAILURE;
         }
       }
+      if(invalid_residue)
+         continue;
       peplist1.push_back({*it, int((*it).length()), -99.9, int_vec});
     }
   } 
@@ -179,13 +185,21 @@ int main(int argc, char *argv[]) {
     std::ifstream file1(in_file);
     while (getline(file1, line)) {
       std::vector<int> int_vec;
+      bool invalid_residue = false;
       for (int i = 0; i < line.length(); i++) {
-        if (alphabet.find(line[i]) == -1) {
-          std::cerr << "Invalid amino acid found in " << line << " at position "
-                    << i + 1 << std::endl;
-          return EXIT_FAILURE;
+         if (alphabet.find(line[i]) == -1) {
+            std::cerr << "Invalid amino acid found in " << line << " at position "
+                    << i + 1 <<". Skipping." << std::endl;
+            invalid_residue = true;
+            break;   
+        //   return EXIT_FAILURE;
+
         }
       }
+
+      if(invalid_residue)
+         continue;
+
       if( trimming ) 
         // std::cout <<line <<'\t';
         line = trim( line ); // this will only work for text file input, not for AIRR data. Must be processed afterwards.
