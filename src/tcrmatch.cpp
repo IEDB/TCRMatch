@@ -13,6 +13,18 @@
 #include <algorithm>
 #include <sstream>
 
+struct TupleHash {
+  template <typename T>
+  std::size_t operator()(const T& tuple) const {
+    auto hash1 = std::hash<std::string>()(std::get<0>(tuple));
+    auto hash2 = std::hash<std::string>()(std::get<1>(tuple));
+    auto hash3 = std::hash<float>()(std::get<2>(tuple));
+    auto hash4 = std::hash<int>()(std::get<3>(tuple));
+    return hash1 ^ hash2 ^ hash3 ^ hash4;
+  }
+};
+
+
 bool is_TCR_gene( std::string& str )
 {
   /**
@@ -363,8 +375,7 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
    * @param iedb_map: IEDB map
    * @return: vector of matching CDR3 sequences
    */
-  std::vector<std::tuple<std::string, std::string, float, int>>::iterator
-      it2[omp_get_max_threads()];
+
   std::vector<std::tuple<std::string, std::string, float, int>>
       results[omp_get_max_threads()];
 
@@ -381,18 +392,22 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
         // Repeat IEDB matches are skipped (prevents duplicate rows in results)
         // but duplicate input sequences are permitted (e.g. for repertoires
         // with identical TCRs)
-        it2[tid] = find(results[tid].begin(), results[tid].end(),
-                        make_tuple(pep1.seq, pep2.seq, score, i));
-        if (it2[tid] == results[tid].end()) {
-          results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
-        }
+
+    		results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
+
       }
     }
   }
-  //   std::cout << "input_sequence\tmatch_"
-  //                "sequence\tscore\treceptor_"
-  //                "group\tepitope\tantigen\torganism\t"
-  //             << std::endl;
+
+  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec;
+  for (const auto& result_item : results)
+    for (const auto& item : result_item) {
+      if (seen.insert(item).second) { // Only insert if it's unique
+        unique_vec.push_back(item);
+    }
+  }
+
+
 
   std::vector<std::string> tcrmatch_output;
 
