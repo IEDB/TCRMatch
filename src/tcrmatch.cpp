@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <unordered_set>
 
 struct TupleHash {
   template <typename T>
@@ -388,17 +389,14 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
       score = k3_sum(pep1, pep2) / sqrt(pep1.aff * pep2.aff);
       if (score > threshold) {
         int tid = omp_get_thread_num();
-        // If input seq-match seq is unique, add tuple to results
-        // Repeat IEDB matches are skipped (prevents duplicate rows in results)
-        // but duplicate input sequences are permitted (e.g. for repertoires
-        // with identical TCRs)
-
     		results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
 
       }
     }
   }
 
+  // Removes duplicates  
+  std::unordered_set<std::tuple<std::string, std::string, float, int>, TupleHash> seen; 
   std::vector<std::tuple<std::string, std::string, float, int>> unique_vec;
   for (const auto& result_item : results)
     for (const auto& item : result_item) {
@@ -407,35 +405,26 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
     }
   }
 
-
-
   std::vector<std::string> tcrmatch_output;
+  for (auto &tuple : unique_vec)
+  { 
+    std::string match_peptide = std::get<1>(tuple);
+    std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
+        iedb_map.find(match_peptide);
+    std::vector<IEDB_data_row> match_row_vec = it->second;
 
-  for (int k = 0; k < omp_get_max_threads(); k++) {
-    for (auto &tuple : results[k]) {
-      std::string match_peptide = std::get<1>(tuple);
-      std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
-          iedb_map.find(match_peptide);
-      std::vector<IEDB_data_row> match_row_vec = it->second;
+    for (int l = 0; l < match_row_vec.size(); l++) {
+      IEDB_data_row match_row = match_row_vec[l];
 
-      for (int l = 0; l < match_row_vec.size(); l++) {
-        IEDB_data_row match_row = match_row_vec[l];
-        //   std::cout << std::fixed << std::setprecision(4) <<
-        //   std::get<0>(tuple)
-        //             << "\t" << std::get<1>(tuple) << "\t" <<
-        //             std::get<2>(tuple)
-        //             << "\t" << match_row.receptor_group << "\t"
-        //             << match_row.epitope << "\t" << match_row.antigen << "\t"
-        //             << match_row.organism << std::endl;
-        std::string score = std::to_string(std::get<2>(tuple));
-        std::string output_string =
-            std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score +
-            "\t" + match_row.receptor_group + "\t" + match_row.epitope + "\t" +
-            match_row.antigen + "\t" + match_row.organism + "\n";
+      std::string score = std::to_string(std::get<2>(tuple));
+      std::string output_string =
+          std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score +
+          "\t" + match_row.receptor_group + "\t" + match_row.epitope + "\t" +
+          match_row.antigen + "\t" + match_row.organism + "\n";
 
-        tcrmatch_output.push_back(output_string);
-      }
+      tcrmatch_output.push_back(output_string);
     }
   }
+
   return tcrmatch_output;
 }
