@@ -39,6 +39,7 @@ To generate the initial scores, please run
 - -t specifies the number of threads to use if operating on more than 1 core
 - -s optional parameter to specify the threshold (default is .97, in alignment with manuscript)
 - -d optional parameter to specify where the database is located, point this to a file of newline separated CDR3b sequences to test your own private set
+- -m sets the maximum amount of RAM that TCRMatch can use (in GB. E.g.: -m 4 means 4GB. Default: 2GB)
 
 To update the IEDB_data.tsv file located in the data folder, navigate to the scripts directory and simply run
 ```

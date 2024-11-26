@@ -1,4 +1,4 @@
-#define VERSION "1.2"
+#define VERSION "1.3"
 
 #include "tcrmatch.cpp"
 
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
         return 0;
       default:
         std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
-                    "score_threshold -d /path/to/database -k -r"
+                    "score_threshold -d /path/to/database -k -r -m MAX_RAM_GB"
                   << std::endl;
       return EXIT_FAILURE;
     }
