@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   bool trimming = true;
   bool trust4flag = false;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "rakvt:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "rakvt:i:s:d:m:")) != -1) {
     switch (opt) {
       case 't':
         n_threads = std::stoi(optarg);
@@ -40,6 +40,9 @@ int main(int argc, char *argv[]) {
         break;
       case 'r':
         trust4flag = true;
+        break;
+      case 'm':
+        MEMORY_LIMIT = static_cast<size_t>(std::stol(optarg)) * 1024 * 1024 * 1024; // Convert GB to bytes
         break;
       case 'v':
         std::cout << VERSION << std::endl;

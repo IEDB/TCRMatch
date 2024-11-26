@@ -13,6 +13,10 @@
 #include <algorithm>
 #include <sstream>
 #include <unordered_set>
+#include <atomic>
+
+std::atomic<size_t> current_memory_usage(0); // Global memory tracker
+size_t MEMORY_LIMIT = 2L * 1024 * 1024 * 1024; // max: 2GB
 
 struct peptide {
   std::string seq;
@@ -390,6 +394,8 @@ std::vector<std::tuple<std::string, std::string, float, int>>*
 find_matches(std::vector<peptide>& peplist1, std::vector<peptide>& peplist2, float threshold)
 {
   auto *results = new std::vector<std::tuple<std::string, std::string, float, int>>[omp_get_max_threads()];
+  int max_matches = 1000000;
+  int nresults = 0;
 
   #pragma omp parallel for
     for (int i = 0; i < peplist1.size(); i++) {
@@ -400,8 +406,19 @@ find_matches(std::vector<peptide>& peplist1, std::vector<peptide>& peplist2, flo
         score = k3_sum(pep1, pep2) / sqrt(pep1.aff * pep2.aff);
         if (score > threshold) {
           int tid = omp_get_thread_num();
-          results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
-
+          auto item = make_tuple(pep1.seq, pep2.seq, score, i);
+          results[tid].push_back(item);
+          nresults += 1;
+          // Increment memory usage
+          current_memory_usage += sizeof(item);
+          
+          if ( current_memory_usage > MEMORY_LIMIT){
+            std::cerr << nresults << " matches processed so far. TCRMatch exceeded the " 
+                      << MEMORY_LIMIT / (1024 * 1024 * 1024) << "GB limit for RAM usage." << std::endl;
+            std::cerr << "Consider partitioning your input or increasing the memory limit using the -m flag." << std::endl;
+            std::cerr << "Aborting." << std::endl;
+			exit(0);
+          }
         }
       }
     }
