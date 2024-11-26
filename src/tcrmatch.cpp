@@ -14,6 +14,14 @@
 #include <sstream>
 #include <unordered_set>
 
+struct peptide {
+  std::string seq;
+  int len;
+  float aff;
+  std::vector<int> i;
+};
+
+
 struct TupleHash {
   template <typename T>
   std::size_t operator()(const T& tuple) const {
@@ -24,21 +32,6 @@ struct TupleHash {
     return hash1 ^ hash2 ^ hash3 ^ hash4;
   }
 };
-
-std::vector<std::tuple<std::string, std::string, float, int>> remove_duplicate_matches(
-    std::vector<std::tuple<std::string, std::string, float, int>>* results) 
-    
-{
-  std::unordered_set<std::tuple<std::string, std::string, float, int>, TupleHash> seen; 
-  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec;
-  for (int tid = 0; tid < omp_get_max_threads(); ++tid) 
-    for (const auto& item : results[tid]) {
-      if (seen.insert(item).second) { // Only insert if it's unique
-        unique_vec.push_back(item);
-    }
-  }
-  return unique_vec;
-}
 
 
 bool is_TCR_gene( std::string& str )
@@ -170,12 +163,6 @@ float blm_qij[20][20] = {
      0.0018, 0.0006, 0.012,  0.0095, 0.0019, 0.0023, 0.0026,
      0.0012, 0.0024, 0.0036, 0.0004, 0.0015, 0.0196}};
 
-struct peptide {
-  std::string seq;
-  int len;
-  float aff;
-  std::vector<int> i;
-};
 
 std::string trim(std::string line) {
   /**
@@ -378,6 +365,51 @@ float k3_sum(peptide pep1, peptide pep2) {
   return (k3);
 }
 
+
+std::vector<std::tuple<std::string, std::string, float, int>> remove_duplicate_matches(
+    std::vector<std::tuple<std::string, std::string, float, int>>* results) 
+    
+{
+  std::unordered_set<std::tuple<std::string, std::string, float, int>, TupleHash> seen; 
+  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec;
+  for (int tid = 0; tid < omp_get_max_threads(); ++tid) 
+    for (const auto& item : results[tid]) {
+      if (seen.insert(item).second) { // Only insert if it's unique
+        unique_vec.push_back(item);
+    }
+  }
+  delete[] results; // Ensure to free memory of results
+
+  return unique_vec;
+}
+
+
+
+
+std::vector<std::tuple<std::string, std::string, float, int>>* 
+find_matches(std::vector<peptide>& peplist1, std::vector<peptide>& peplist2, float threshold)
+{
+  auto *results = new std::vector<std::tuple<std::string, std::string, float, int>>[omp_get_max_threads()];
+
+  #pragma omp parallel for
+    for (int i = 0; i < peplist1.size(); i++) {
+      for (int j = 0; j < peplist2.size(); j++) {
+        peptide pep1 = peplist1[i];
+        peptide pep2 = peplist2[j];
+        float score = 0.0;
+        score = k3_sum(pep1, pep2) / sqrt(pep1.aff * pep2.aff);
+        if (score > threshold) {
+          int tid = omp_get_thread_num();
+          results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
+
+        }
+      }
+    }
+    return results;
+}
+
+
+
 std::vector<std::string>
 multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
               float threshold,
@@ -392,24 +424,9 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
    * @return: vector of matching CDR3 sequences
    */
 
-  auto *results = new std::vector<std::tuple<std::string, std::string, float, int>>[omp_get_max_threads()];
 
-#pragma omp parallel for
-  for (int i = 0; i < peplist1.size(); i++) {
-    for (int j = 0; j < peplist2.size(); j++) {
-      peptide pep1 = peplist1[i];
-      peptide pep2 = peplist2[j];
-      float score = 0.0;
-      score = k3_sum(pep1, pep2) / sqrt(pep1.aff * pep2.aff);
-      if (score > threshold) {
-        int tid = omp_get_thread_num();
-    		results[tid].push_back(make_tuple(pep1.seq, pep2.seq, score, i));
-
-      }
-    }
-  }
-
-  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec = remove_duplicate_matches(results); 
+  auto results = find_matches(peplist1, peplist2, threshold);
+  auto unique_vec = remove_duplicate_matches(results); 
 
   std::vector<std::string> tcrmatch_output;
   for (auto &tuple : unique_vec)
