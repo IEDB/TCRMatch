@@ -25,6 +25,21 @@ struct TupleHash {
   }
 };
 
+std::vector<std::tuple<std::string, std::string, float, int>> remove_duplicate_matches(
+    std::vector<std::tuple<std::string, std::string, float, int>>* results) 
+    
+{
+  std::unordered_set<std::tuple<std::string, std::string, float, int>, TupleHash> seen; 
+  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec;
+  for (int tid = 0; tid < omp_get_max_threads(); ++tid) 
+    for (const auto& item : results[tid]) {
+      if (seen.insert(item).second) { // Only insert if it's unique
+        unique_vec.push_back(item);
+    }
+  }
+  return unique_vec;
+}
+
 
 bool is_TCR_gene( std::string& str )
 {
@@ -377,8 +392,7 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
    * @return: vector of matching CDR3 sequences
    */
 
-  std::vector<std::tuple<std::string, std::string, float, int>>
-      results[omp_get_max_threads()];
+  auto *results = new std::vector<std::tuple<std::string, std::string, float, int>>[omp_get_max_threads()];
 
 #pragma omp parallel for
   for (int i = 0; i < peplist1.size(); i++) {
@@ -395,15 +409,7 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
     }
   }
 
-  // Removes duplicates  
-  std::unordered_set<std::tuple<std::string, std::string, float, int>, TupleHash> seen; 
-  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec;
-  for (const auto& result_item : results)
-    for (const auto& item : result_item) {
-      if (seen.insert(item).second) { // Only insert if it's unique
-        unique_vec.push_back(item);
-    }
-  }
+  std::vector<std::tuple<std::string, std::string, float, int>> unique_vec = remove_duplicate_matches(results); 
 
   std::vector<std::string> tcrmatch_output;
   for (auto &tuple : unique_vec)
