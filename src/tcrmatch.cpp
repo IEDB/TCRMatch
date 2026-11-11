@@ -76,7 +76,7 @@ void erase_newline( std::string& str )
    * @param str: line from input file
    */  
   
-	if (str.back() == '\n' || str.back() == '\r') 
+	if (!str.empty() && (str.back() == '\n' || str.back() == '\r'))
 		str.erase(str.find_last_of("\r\n"));
 }
 
@@ -187,17 +187,23 @@ std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
   /**
    * Read the IEDB data file
    *
+   * A database can have several rows for the same trimmed sequence (one per
+   * receptor group in the schema2 file); each sequence is returned once, in
+   * order of first appearance, so it is only scored once.
+   *
    * @param IEDB_data_file: path to IEDB data file
-   * @return: vector of trimmed sequences
+   * @return: vector of distinct trimmed sequences
    */
   std::vector<std::string> iedb_data;
+  std::unordered_set<std::string> seen;
   std::ifstream iedb_file(IEDB_data_file);
   std::string line;
   while (getline(iedb_file, line)) {
     std::stringstream ss(line);
     std::string sequence;
     ss >> sequence;
-    if (sequence != "trimmed_seq") {
+    if (!sequence.empty() && sequence != "trimmed_seq" &&
+        seen.insert(sequence).second) {
       iedb_data.push_back(sequence);
     }
   }
@@ -212,42 +218,94 @@ struct IEDB_data_row {
   std::string epitope;
   std::string organism;
   std::string antigen;
+  std::string receptor_species;  // empty for databases without this column
 };
+
+std::vector<std::string> split_tabs(const std::string &line) {
+  /**
+   * Split a line on tabs. A trailing empty field (line ending in a tab) is
+   * not returned; callers treat missing fields as empty.
+   */
+  std::vector<std::string> fields;
+  std::stringstream buffer(line);
+  std::string field;
+  while (getline(buffer, field, '\t'))
+    fields.push_back(field);
+  return fields;
+}
+
+std::string field_or_empty(const std::vector<std::string> &fields, int idx) {
+  if (idx < 0 || idx >= (int)fields.size())
+    return "";
+  return fields[idx];
+}
 
 std::map<std::string, std::vector<IEDB_data_row>>
 create_IEDB_map(std::string IEDB_data_file) {
   /**
-   * Create a map of IEDB data
+   * Create a map of IEDB data, keyed by trimmed sequence
+   *
+   * If the first line starts with "trimmed_seq" it is a header and columns
+   * are found by name, so both the legacy IEDB_data.tsv (6 columns) and
+   * IEDB_data.schema2.tsv (adds receptor_species) work, and unknown extra
+   * columns are ignored. Without a header (e.g. a plain list of CDR3b
+   * sequences), columns are read positionally in the legacy order and missing
+   * ones are left empty.
    *
    * @param IEDB_data_file: path to IEDB data file
    * @return: map of IEDB data
    */
   std::map<std::string, std::vector<IEDB_data_row>> iedb_map;
-  std::map<std::string, std::vector<IEDB_data_row>>::iterator it;
-  std::vector<IEDB_data_row> iedb_data;
   std::ifstream iedb_file(IEDB_data_file);
-  IEDB_data_row input_row;
   std::string line;
-  std::string temp;
-  int idx;
 
-  // read values
+  // Column indices in the legacy (headerless) order.
+  int c_trimmed = 0, c_original = 1, c_group = 2, c_epitopes = 3,
+      c_organisms = 4, c_antigens = 5, c_species = -1;
+
+  bool first_line = true;
   while (getline(iedb_file, line)) {
-    idx = 0;
-    std::stringstream buffer(line);
-    std::string values[6];
-    while (getline(buffer, temp, '\t')) {
-      values[idx] = temp;
-      idx++;
+    erase_newline(line);
+    std::vector<std::string> fields = split_tabs(line);
+
+    if (first_line) {
+      first_line = false;
+      if (!fields.empty() && fields[0] == "trimmed_seq") {
+        std::map<std::string, int> col;
+        for (int i = 0; i < (int)fields.size(); i++)
+          col[fields[i]] = i;
+        const char *required[] = {"trimmed_seq",      "original_seq",
+                                  "receptor_group",   "epitopes",
+                                  "source_organisms", "source_antigens"};
+        for (const char *name : required) {
+          if (col.find(name) == col.end()) {
+            std::cerr << "Database file " << IEDB_data_file
+                      << " is missing the required column '" << name << "'"
+                      << std::endl;
+            exit(EXIT_FAILURE);
+          }
+        }
+        c_trimmed = col["trimmed_seq"];
+        c_original = col["original_seq"];
+        c_group = col["receptor_group"];
+        c_epitopes = col["epitopes"];
+        c_organisms = col["source_organisms"];
+        c_antigens = col["source_antigens"];
+        c_species =
+            col.count("receptor_species") ? col["receptor_species"] : -1;
+        continue;
+      }
     }
-    it = iedb_map.find(values[0]);
-    if (it != iedb_map.end()) {
-      iedb_map[values[0]].push_back(
-          {values[0], values[1], values[2], values[3], values[4], values[5]});
-    } else {
-      iedb_map[values[0]] = {
-          {values[0], values[1], values[2], values[3], values[4], values[5]}};
-    }
+
+    std::string key = field_or_empty(fields, c_trimmed);
+    if (key.empty())
+      continue;
+    iedb_map[key].push_back({key, field_or_empty(fields, c_original),
+                             field_or_empty(fields, c_group),
+                             field_or_empty(fields, c_epitopes),
+                             field_or_empty(fields, c_organisms),
+                             field_or_empty(fields, c_antigens),
+                             field_or_empty(fields, c_species)});
   }
 
   return iedb_map;
@@ -451,7 +509,12 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
     std::string match_peptide = std::get<1>(tuple);
     std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
         iedb_map.find(match_peptide);
-    std::vector<IEDB_data_row> match_row_vec = it->second;
+    // A matched sequence without metadata still gets one (unannotated) line.
+    std::vector<IEDB_data_row> match_row_vec;
+    if (it != iedb_map.end())
+      match_row_vec = it->second;
+    else
+      match_row_vec.push_back({match_peptide, "", "", "", "", "", ""});
 
     for (int l = 0; l < match_row_vec.size(); l++) {
       IEDB_data_row match_row = match_row_vec[l];
@@ -460,7 +523,8 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
       std::string output_string =
           std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score +
           "\t" + match_row.receptor_group + "\t" + match_row.epitope + "\t" +
-          match_row.antigen + "\t" + match_row.organism + "\n";
+          match_row.antigen + "\t" + match_row.organism + "\t" +
+          match_row.receptor_species + "\n";
 
       tcrmatch_output.push_back(output_string);
     }

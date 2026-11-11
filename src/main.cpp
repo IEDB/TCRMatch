@@ -1,4 +1,4 @@
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 #include "tcrmatch.cpp"
 
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
   else 
     was_trimmed = "";
 
-  tcrmatch_output_header = was_trimmed + "input_sequence\tmatch_sequence\tscore\treceptor_group\tepitope\tantigen\torganism" ;
+  tcrmatch_output_header = was_trimmed + "input_sequence\tmatch_sequence\tscore\treceptor_group\tepitope\tantigen\torganism\treceptor_species" ;
 
   if( trust4flag == true ){
     std::cout << trust4header <<"\t";

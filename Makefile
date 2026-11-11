@@ -6,6 +6,11 @@ all: tcrmatch
 tcrmatch: src/main.cpp src/tcrmatch.cpp
 	$(CC) $(CFLAGS) -o tcrmatch src/main.cpp 
 
+test: tcrmatch
+	bash tests/run_tests.sh
+
 clean:
 	rm tcrmatch
+
+.PHONY: all test clean
 
