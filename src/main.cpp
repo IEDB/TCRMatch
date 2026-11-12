@@ -8,6 +8,8 @@ int main(int argc, char *argv[]) {
   float threshold;
   std::string in_file;
   std::string iedb_file = "data/IEDB_data.tsv";
+  std::string per_group_file;  // -p: also write one line per receptor group
+  std::string collapsed_file;  // -c: also write matches collapsed by epitope
   int i_flag = -1;
   int t_flag = -1;
   int thresh_flag = -1;
@@ -15,7 +17,7 @@ int main(int argc, char *argv[]) {
   bool trimming = true;
   bool trust4flag = false;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "rakvt:i:s:d:m:")) != -1) {
+  while ((opt = getopt(argc, argv, "rakvt:i:s:d:m:c:p:")) != -1) {
     switch (opt) {
       case 't':
         n_threads = std::stoi(optarg);
@@ -35,6 +37,12 @@ int main(int argc, char *argv[]) {
       case 'd':
         iedb_file = optarg;
         break;
+      case 'c':
+        collapsed_file = optarg;
+        break;
+      case 'p':
+        per_group_file = optarg;
+        break;
       case 'k':
         trimming = false;
         break;
@@ -49,7 +57,8 @@ int main(int argc, char *argv[]) {
         return 0;
       default:
         std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
-                    "score_threshold -d /path/to/database -k -r -m MAX_RAM_GB"
+                    "score_threshold -d /path/to/database -k -r -m MAX_RAM_GB "
+                    "-p per_receptor_group.tsv -c collapsed_by_epitope.tsv"
                   << std::endl;
       return EXIT_FAILURE;
     }
@@ -77,8 +86,15 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  bool is_schema2 = false;
   std::map<std::string, std::vector<IEDB_data_row>> iedb_map =
-      create_IEDB_map(iedb_file);
+      create_IEDB_map(iedb_file, &is_schema2);
+
+  // Check -p and -c before scoring, so a bad database or path fails fast.
+  std::ofstream per_group_out, collapsed_out;
+  if (!open_summary_file('p', per_group_file, is_schema2, per_group_out) ||
+      !open_summary_file('c', collapsed_file, is_schema2, collapsed_out))
+    return EXIT_FAILURE;
 
   std::vector<std::string> iedb_data = read_IEDB_data(iedb_file);
   // Check if we didn't read any data into IEDB data
@@ -249,16 +265,47 @@ int main(int argc, char *argv[]) {
 
   // Calculate input data vs database with multi-threading
   std::vector<std::string> extended_output;
-  std::vector<std::string> tcrmatch_output = multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
+  // Standard output: one line per input, match and untrimmed CDR3b, with
+  // ';' lists by receptor group (see group_by_cdr3).
+  std::vector<std::string> per_group_output, collapsed_output;
+  std::vector<std::string> tcrmatch_output = multi_calc_k3(
+      peplist1, peplist2, threshold, iedb_map, is_schema2,
+      per_group_file.empty() ? nullptr : &per_group_output,
+      collapsed_file.empty() ? nullptr : &collapsed_output);
 
   std::string tcrmatch_output_header;
   std::string was_trimmed;
   if( trimming )
     was_trimmed = "trimmed_";
-  else 
+  else
     was_trimmed = "";
 
-  tcrmatch_output_header = was_trimmed + "input_sequence\tmatch_sequence\tscore\treceptor_group\tepitope\tantigen\torganism\treceptor_species" ;
+  // Extra views. Per receptor group (-p): one line per input, match and
+  // receptor group. Collapsed (-c): one line per input, match and epitope.
+  // In TRUST4 mode both are keyed on the CDR3 sequence, without the TRUST4
+  // columns.
+  if (!write_summary_file(
+          per_group_out, per_group_file,
+          was_trimmed + "input_sequence\tmatch_sequence\tscore\t"
+                        "untrimmed_match_sequence\treceptor_group\t"
+                        "n_epitopes\tepitopes\tn_antigens\tantigens\t"
+                        "n_organisms\torganisms\treceptor_species",
+          per_group_output) ||
+      !write_summary_file(
+          collapsed_out, collapsed_file,
+          was_trimmed + "input_sequence\tmatch_sequence\tscore\tepitope\t"
+                        "antigen\torganism\tn_receptor_groups\t"
+                        "receptor_groups\tn_receptor_species\t"
+                        "receptor_species",
+          collapsed_output))
+    return EXIT_FAILURE;
+
+  tcrmatch_output_header =
+      was_trimmed + "input_sequence\tmatch_sequence\tscore\t"
+                    "untrimmed_match_sequence\tn_receptor_groups\t"
+                    "receptor_groups\tn_epitopes\tepitopes\tn_antigens\t"
+                    "antigens\tn_organisms\torganisms\tn_receptor_species\t"
+                    "receptor_species";
 
   if( trust4flag == true ){
     std::cout << trust4header <<"\t";

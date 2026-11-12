@@ -1,0 +1,124 @@
+trimmed_input_sequence	match_sequence	score	untrimmed_match_sequence	receptor_group	n_epitopes	epitopes	n_antigens	antigens	n_organisms	organisms	receptor_species
+ASSSRSSYEQY	AISSRSSYEQY	0.976650	AISSRSSYEQY	12324	1	NLVPMVATV	1	HCMVUL83	1	Human herpesvirus 5 (Human cytomegalovirus)	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	15725	2	GILGFVFTL|LLLDRLNQL	2	Matrix protein 1|Nucleoprotein	2	Influenza A virus|SARS coronavirus BJ01	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	37845	2	GILGFVFTL|GLCTLVAML	2	Matrix protein 1|Transcriptional regulator IE63 homolog	2	Influenza A virus|Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	37960	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39338	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39623	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39656	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39657	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39659	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39668	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39676	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39699	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39701	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39703	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39704	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39707	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39711	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39712	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39716	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39717	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39721	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39724	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39725	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39726	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39727	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39732	2	GILGFVFTL|RAKFKQLL	2	Matrix protein 1|Lytic switch protein BZLF1	2	Influenza A virus|Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSERSSYEQY	0.972149	ASSERSSYEQY	21200	1	AMKRHGLDNYREYSLGN	0		0		Mus musculus
+ASSSRSSYEQY	ASSKRSSYEQY	0.973471	ASSKRSSYEQY	41132	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSKRSSYEQY	0.973471	ASSKRSSYEQY	194689	2	GILGFVFTL|LLLDRLNQL	2	Matrix protein 1|Nucleoprotein	2	Influenza A virus|SARS coronavirus BJ01	Homo sapiens
+ASSSRSSYEQY	ASSNRSSYEQY	0.973324	ASSNRSSYEQY	16861	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSQRSSYEQY	0.971257	ASSQRSSYEQY	13687	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSQRSSYEQY	0.971257	ASSQRSSYEQY	41017	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSQRSSYEQY	0.971257	ASSQRSSYEQY	45851	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSRSSYEQY	0.975811	ASSRSSYEQY	13575	4	GILGFVFTL|LLLDRLNQL|LLWNGPMAV|FVCNLLLLFVTVYSHLLLV	4	Matrix protein 1|Nucleoprotein|non-structural protein NS4b|ORF3a protein [Severe acute respiratory syndrome coronavirus 2]	4	Influenza A virus|SARS coronavirus BJ01|Yellow fever virus 17D (Yellow fever virus (STRAIN 17D))|SARS-CoV2	Homo sapiens
+ASSSRSSYEQY	ASSRSSYEQY	0.975811	ASSRSSYEQY	45711	1	AVFDRKSDAK	1	Epstein-Barr nuclear antigen 4	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	15254	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	20530	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	20890	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	20891	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	20892	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	37398	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRASYEQY	0.980316	ASSSRASYEQY	49379	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	14944	4	GILGFVFTL|LLLDRLNQL|FLPFFSNVTWFHAI|LLDSVQPIARELY	3	Matrix protein 1|Nucleoprotein|surface glycoprotein [Severe acute respiratory syndrome coronavirus 2]|	3	Influenza A virus|SARS coronavirus BJ01|SARS-CoV2|	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	20453	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	20512	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	20847	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	20854	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	40704	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	40719	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	49575	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	49576	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	222925	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSKYEQY	0.970108	ASSSRSKYEQY	223091	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYDQY	0.978420	ASSSRSSYDQY	13590	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	819	4	GILGFVFTL|GILEFVFTL|GILGLVFTL|GIWGFVFTL	2	Matrix protein 1|matrix protein 1|matrix protein 1|matrix protein 1	4	Influenza A virus|Influenza A virus (A/chicken/Anhui/1/1998(H9N2)) (Influenza A virus (A/Chicken/Anhui/1/98(H9N2)))|Influenza A virus (A/Canterbury/236/2005(H3N2))|Influenza A virus (A/bar-headed goose/Qinghai/3/2005(H5N1)) (Influenza A virus (A/bar headed goose/Qinghai/3/2005(H5N1)))	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	1534	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	8684	7	ELAGIGILTV|GILGFVFAL|GILGFVFTL|LLLDRLNQL|FLPFFSNVTWFHAI|GILGFTFTL|GILGFVFSL	3	||Matrix protein 1|Nucleoprotein|surface glycoprotein [Severe acute respiratory syndrome coronavirus 2]||	3	||Influenza A virus|SARS coronavirus BJ01|SARS-CoV2||	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	20456	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	20600	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	20667	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	20683	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	29231	1	EAAGIGILTV	1	Melanoma antigen recognized by T-cells 1	1	Homo sapiens (human)	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	37399	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	40808	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	41019	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	48902	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	49634	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	222969	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	223094	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	223095	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	223096	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	223097	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	CASSSRSSYEQYF	999999999	2	GILGFVFTL|ELAGIGILTV	1	Matrix protein 1; synthetic|	1	Influenza A virus|	
+ASSSRSSYEQY	ASSSRTSYEQY	0.979731	ASSSRTSYEQY	13594	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSSSRSSYEQY	0.978749	ASSSSRSSYEQY	9409	1	NLVPMVATV	1	HCMVUL83	1	Human herpesvirus 5 (Human cytomegalovirus)	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	1447	1	LLWNGPMAV	1	non-structural protein NS4b	1	Yellow fever virus 17D (Yellow fever virus (STRAIN 17D))	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	1595	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	13679	7	GILGFVFAL|GILGFVFTL|GLCTLVAML|LLLDRLNQL|VSDGGPNLY|FLPFFSNVTWFHAI|GILGFVFSL	5	|Matrix protein 1|Transcriptional regulator IE63 homolog|Nucleoprotein|RNA-directed RNA polymerase catalytic subunit|surface glycoprotein [Severe acute respiratory syndrome coronavirus 2]|	5	|Influenza A virus|Human herpesvirus 4 (Epstein Barr virus)|SARS coronavirus BJ01|Influenza A virus H3N2 (A/Resvir-9 (H3N2))|SARS-CoV2|	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	20462	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	20646	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	20903	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	27391	2	GILGFVFTL|RAKFKQLL	2	Matrix protein 1|Lytic switch protein BZLF1	2	Influenza A virus|Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	36717	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	37397	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	39693	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	40816	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	41018	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	41031	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	41479	1	GLCTLVAML	1	Transcriptional regulator IE63 homolog	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	47581	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	48138	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	48925	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	48926	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	48973	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	191195	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	222968	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	222972	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	223077	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	223078	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	223079	1	GILGFVFTL	1	Matrix protein 1	1	Influenza A virus	Homo sapiens
+ASSPGLGTYEQY	ASSPGLGTYEQY	1.000000	ASSPGLGTYEQY	1457	1	LLWNGPMAV	1	non-structural protein NS4b	1	Yellow fever virus 17D (Yellow fever virus (STRAIN 17D))	Homo sapiens
+ASSPGLGTYEQY	ASSPGLGTYEQY	1.000000	ASSPGLGTYEQY	187364	1	KYNKANVFL	0		0		Mus musculus
+ASSLGQAYEQY	ASALGQAYEQY	0.983312	ASALGQAYEQY	1933	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSIGQAYEQY	0.982577	ASSIGQAYEQY	26266	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSIGQAYEQY	0.982577	ASSIGQAYEQY	206873	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEAY	0.974473	ASSLGQAYEAY	1940	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQA	0.981858	ASSLGQAYEQA	1935	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1412	9	FLRGRAYGL|RPPIFIRRL|EEYLQAFTY|FLRGRFYGL|EEYLKAWTF|FLRGRAFGL|FLRGRAYVL|TLRGRAYGL|YLRGRAYGL	3	nuclear antigen EBNA-3|Epstein-Barr nuclear antigen 3|ATP-binding cassette sub-family D member 3||||||	2	Human herpesvirus 4 (Epstein Barr virus)|Human herpesvirus 4 (Epstein Barr virus)|Homo sapiens (human)||||||	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1949	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1955	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1956	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1957	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2003	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2004	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2005	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2006	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2007	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2008	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	18174	6	FLRGRAYGL|GLCTLVAML|EEYLQAFTY|EEYLKAWTF|FLWLLWPVTLACFVLAAV|LLLLDRLNQLESKMS	5	nuclear antigen EBNA-3|Transcriptional regulator IE63 homolog|ATP-binding cassette sub-family D member 3||membrane glycoprotein [Severe acute respiratory syndrome coronavirus 2]|nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2]	3	Human herpesvirus 4 (Epstein Barr virus)|Human herpesvirus 4 (Epstein Barr virus)|Homo sapiens (human)||SARS-CoV2|SARS-CoV2	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	183325	1	TTDPSFLGRY	1	Replicase polyprotein 1ab	1	SARS-CoV2	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	CASSLGQAYEQYV	45028	1	KLGGALQAK	1	Immediate early protein IE1	1	Human herpesvirus 5 strain AD169 (Human cytomegalovirus (strain AD169))	Homo sapiens
+ASSLGQAYEQY	ASSLGQSYEQY	0.977662	ASSLGQSYEQY	97536	3	VMATRRNVL|APKEIIFLEGETL|HTTDPSFLGRY	2	Uncharacterized protein Rv1518/MT1568|orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2]|orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2]	2	Mycobacterium tuberculosis|SARS-CoV2|SARS-CoV2	Homo sapiens
+ASSLGQAYEQY	ASSVGQAYEQY	0.978528	ASSVGQAYEQY	26257	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens

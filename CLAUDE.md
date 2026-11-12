@@ -12,7 +12,7 @@ The IEDB database files are built weekly by a separate repo, `update-repspec` (g
 
 ```shell
 make                    # Linux: g++ with -fopenmp
-make CC=g++-16          # macOS: Apple clang rejects -fopenmp, so use Homebrew GCC
+make CC=g++-16          # macOS: Apple clang rejects -fopenmp, so use Homebrew GCC (any version)
 make test               # (add the same CC=... on macOS) runs tests/run_tests.sh
 make clean
 ```
@@ -31,7 +31,7 @@ make clean
 
 ## CLI flags (from `getopt` in `main.cpp`)
 
-`-i` input file and `-t` thread count are required. Optional flags: `-s` threshold, `-d` database path, `-m` memory cap in GB (default 2), `-a` AIRR TSV input (reads the `cdr3_aa` column), `-r` TRUST4 report input, `-k` disable trimming, `-v` print version.
+`-i` input file and `-t` thread count are required. Optional flags: `-s` threshold, `-d` database path, `-m` memory cap in GB (default 2), `-a` AIRR TSV input (reads the `cdr3_aa` column), `-r` TRUST4 report input, `-k` disable trimming, `-p FILE` also write one line per receptor group to FILE (schema2 only), `-c FILE` also write the matches collapsed by epitope to FILE (schema2 only), `-v` print version.
 
 ## Database formats
 
@@ -59,11 +59,20 @@ Both formats start with the header `trimmed_seq, original_seq, receptor_group, e
 4. **Scoring:** `fmatrix_k1()` computes the global `k1` matrix from the hardcoded BLOSUM62 `blm_qij` frequencies with `P_BETA`.
    - `k3_sum` sums the k-mer products for k=1..30 using a stack array `float[31][31][31]`, so it assumes sequences are ≤30 residues.
    - Each peptide's self-score (`aff`) is precomputed, and the final score is `k3(a,b)/sqrt(aff_a*aff_b)`.
-5. **Matching:** `find_matches` runs an OpenMP all-vs-all loop that writes into per-thread result vectors. It increments a global atomic `current_memory_usage` and calls `exit(0)` once `MEMORY_LIMIT` is exceeded. Next, `remove_duplicate_matches` merges and dedups the vectors, and `multi_calc_k3` expands each match into one output line per DB metadata row (one per receptor group with schema2).
-6. **Output** is TSV on stdout: `input_sequence, match_sequence, score, receptor_group, epitope, antigen, organism, receptor_species`.
-   - `receptor_species` is empty with legacy or headerless databases.
-   - In TRUST4 mode, each TRUST4 row is prepended to its matches.
-   - Diagnostics go to stderr.
+5. **Matching:** `find_matches` runs an OpenMP all-vs-all loop that writes into per-thread result vectors. It increments a global atomic `current_memory_usage` and calls `exit(0)` once `MEMORY_LIMIT` is exceeded. Next, `remove_duplicate_matches` merges and dedups the vectors. `multi_calc_k3` then builds the outputs from them; each view reports an (input, match) pair once (`distinct_matches`), even if the input repeats a sequence.
+6. **Standard output** (`group_by_cdr3`) is TSV with one line per input, match and untrimmed CDR3β (the DB's `original_seq`). This is the same set of lines as the legacy DB's rows. Its columns are `input_sequence, match_sequence, score, untrimmed_match_sequence, n_receptor_groups, receptor_groups, n_epitopes, epitopes, n_antigens, antigens, n_organisms, organisms, n_receptor_species, receptor_species`.
+   - Each list column has one `;` entry per receptor group, in step. With schema2, each entry is that group's `|` list, unchanged.
+   - Every `n_*` column comes just before its list and counts distinct non-empty values (`count_distinct`).
+   - With a legacy or headerless DB, each DB row is its own line, lists are copied as they are, and the `n_*` columns are empty. Apart from the extra columns, the output then matches 1.3 line for line.
+   - `without_semicolons` writes a `;` inside a name as `,`. Only the antigen "UL123; IE1" has one in current data.
+   - In TRUST4 mode, each TRUST4 row is prepended to its matches. Diagnostics go to stderr.
+7. **Per-receptor-group output (`-p FILE`)** (`per_receptor_group`): one line per input, match and receptor group, which was the stdout layout before. Its columns are `input_sequence, match_sequence, score, untrimmed_match_sequence, receptor_group, n_epitopes, epitopes, n_antigens, antigens, n_organisms, organisms, receptor_species`.
+8. **Collapsed output (`-c FILE`)** (`collapse_by_epitope`): one line per input, match and epitope. Its columns are `input_sequence, match_sequence, score, epitope, antigen, organism, n_receptor_groups, receptor_groups, n_receptor_species, receptor_species`.
+   - Each schema2 `|` list is split with empties kept, and each distinct receptor group counts once per epitope.
+   - Antigen and organism come from the label given by the most groups, preferring a non-empty one. Epitopes are sorted by group count (descending), then by name.
+9. **Rules shared by `-p` and `-c`.** Both are written in addition to stdout and never change it, through `open_summary_file` and `write_summary_file`.
+   - `create_IEDB_map` reports schema2 through its `is_schema2` out-parameter, meaning the header has `receptor_species`. `open_summary_file` rejects `-p` and `-c` with any other database before scoring.
+   - In TRUST4 mode neither file has TRUST4 columns.
 
 ## Release
 

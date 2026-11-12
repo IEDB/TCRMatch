@@ -14,6 +14,8 @@
 #   plain_db.txt    headerless list of CDR3b sequences
 #   query*.txt/tsv  text, AIRR and TRUST4 inputs (query.txt has an invalid
 #                   sequence, which is skipped with a warning)
+# per_group_*.tsv and collapsed_*.tsv in tests/expected/ are the -p (one line
+# per receptor group) and -c (collapsed by epitope) files.
 set -u
 cd "$(dirname "$0")/.."
 TCRMATCH="${TCRMATCH:-./tcrmatch}"
@@ -51,7 +53,56 @@ for db in legacy schema2 plain; do
 done
 check text_schema2_untrimmed -i "$D/query.txt" -k -d "$D/schema2_db.tsv"
 
+check_view() {  # name, view flag (-p or -c), then tcrmatch arguments; compares that file
+    local name="$1" flag="$2"
+    shift 2
+    "$TCRMATCH" "$@" -t 1 "$flag" "$TMP/$name.tsv" > "$TMP/$name.stdout" 2> "$TMP/$name.err"
+    local status=$?
+    if [[ "${UPDATE:-0}" == "1" ]]; then
+        cp "$TMP/$name.tsv" "$E/$name.tsv"
+        echo "updated $name"
+    elif [[ $status -eq 0 ]] && cmp -s "$TMP/$name.tsv" "$E/$name.tsv"; then
+        pass=$((pass + 1))
+        echo "ok      $name"
+    else
+        fail=$((fail + 1))
+        echo "FAIL    $name (exit $status)"
+        diff "$E/$name.tsv" "$TMP/$name.tsv" | head -10
+    fi
+}
+
+check_view collapsed_text_schema2 -c -i "$D/query.txt" -d "$D/schema2_db.tsv"
+check_view collapsed_trust4_schema2 -c -i "$D/query_trust4.tsv" -r -d "$D/schema2_db.tsv"
+check_view per_group_text_schema2 -p -i "$D/query.txt" -d "$D/schema2_db.tsv"
+check_view per_group_trust4_schema2 -p -i "$D/query_trust4.tsv" -r -d "$D/schema2_db.tsv"
+
 [[ "${UPDATE:-0}" == "1" ]] && exit 0
+
+# -p and -c write separate files; the main output must not change.
+unchanged=1
+for v in collapsed per_group; do
+    cmp -s "$TMP/${v}_text_schema2.stdout" "$E/text_schema2.tsv" || unchanged=0
+    cmp -s "$TMP/${v}_trust4_schema2.stdout" "$E/trust4_schema2.tsv" || unchanged=0
+done
+if [[ $unchanged -eq 1 ]]; then
+    pass=$((pass + 1)); echo "ok      views_stdout_unchanged"
+else
+    fail=$((fail + 1)); echo "FAIL    views_stdout_unchanged"
+fi
+
+# -p and -c refuse a legacy database (pooled, misaligned lists) before scoring.
+for flag in -p -c; do
+    rm -f "$TMP/legacy_view.tsv"
+    "$TCRMATCH" -i "$D/query.txt" -t 1 -d "$D/legacy_db.tsv" "$flag" "$TMP/legacy_view.tsv" \
+        > /dev/null 2> "$TMP/legacy_view.err"
+    status=$?
+    if [[ $status -ne 0 ]] && [[ ! -e "$TMP/legacy_view.tsv" ]] &&
+            grep -q "needs a schema2 database" "$TMP/legacy_view.err"; then
+        pass=$((pass + 1)); echo "ok      view_rejects_legacy $flag"
+    else
+        fail=$((fail + 1)); echo "FAIL    view_rejects_legacy $flag (exit $status)"
+    fi
+done
 
 # Columns are read by header name: reordering them, adding an unknown column
 # and using Windows line endings must not change the output.
