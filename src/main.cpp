@@ -2,12 +2,24 @@
 
 #include "tcrmatch.cpp"
 
+const char *USAGE =
+    "Usage: ./tcrmatch -i infile_name.txt -t num_threads [-s score_threshold] "
+    "[-d /path/to/database] [-a | -r] [-k] [-m MAX_RAM_GB] "
+    "[-p per_receptor_group.tsv] [-c collapsed_by_epitope.tsv] "
+    "[--species \"Homo sapiens,...\"] "
+    "[--antigen-type neoantigen,viral,germline,other]\n"
+    "       ./tcrmatch -l [-d /path/to/database]   (list the receptor species)\n"
+    "       ./tcrmatch -v                          (print the version)";
+
 int main(int argc, char *argv[]) {
   int opt;
   int n_threads;
   float threshold;
   std::string in_file;
-  std::string iedb_file = "data/IEDB_data.tsv";
+  std::string iedb_file = "data/IEDB_data.schema2.tsv";
+  std::vector<std::string> species;  // --species: keep only these receptors
+  std::vector<std::string> antigen_types;  // --antigen-type: keep only these epitopes
+  bool list_species_flag = false;
   std::string per_group_file;  // -p: also write one line per receptor group
   std::string collapsed_file;  // -c: also write matches collapsed by epitope
   int i_flag = -1;
@@ -17,8 +29,31 @@ int main(int argc, char *argv[]) {
   bool trimming = true;
   bool trust4flag = false;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "rakvt:i:s:d:m:c:p:")) != -1) {
+  enum { OPT_SPECIES = 1000, OPT_ANTIGEN_TYPE };
+  static struct option long_options[] = {
+      {"list-species", no_argument, nullptr, 'l'},
+      {"species", required_argument, nullptr, OPT_SPECIES},
+      {"antigen-type", required_argument, nullptr, OPT_ANTIGEN_TYPE},
+      {"version", no_argument, nullptr, 'v'},
+      {nullptr, 0, nullptr, 0}};
+  while ((opt = getopt_long(argc, argv, "rakvlt:i:s:d:m:c:p:", long_options,
+                            nullptr)) != -1) {
     switch (opt) {
+      case 'l':
+        list_species_flag = true;
+        break;
+      case OPT_SPECIES:
+        species = parse_name_list(optarg);
+        if (species.empty()) {
+          std::cerr << "--species needs at least one species name, e.g. "
+                       "--species \"Homo sapiens\""
+                    << std::endl;
+          return EXIT_FAILURE;
+        }
+        break;
+      case OPT_ANTIGEN_TYPE:
+        antigen_types = parse_antigen_types(optarg);
+        break;
       case 't':
         n_threads = std::stoi(optarg);
         t_flag = 1;
@@ -56,19 +91,18 @@ int main(int argc, char *argv[]) {
         std::cout << VERSION << std::endl;
         return 0;
       default:
-        std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
-                    "score_threshold -d /path/to/database -k -r -m MAX_RAM_GB "
-                    "-p per_receptor_group.tsv -c collapsed_by_epitope.tsv"
-                  << std::endl;
+        std::cerr << USAGE << std::endl;
       return EXIT_FAILURE;
     }
   }
 
+  if (list_species_flag)
+    return list_species(iedb_file);
+
   // Check that required parameters are there + error correcting
   if (i_flag == -1 || t_flag == -1) {
     std::cerr << "Missing mandatory parameters" << std::endl
-              << "Usage: ./tcrmatch -i infile_name.txt -t num_threads"
-              << std::endl;
+              << USAGE << std::endl;
     return EXIT_FAILURE;
   }
   if (n_threads < 1) {
@@ -86,26 +120,30 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  bool is_schema2 = false;
+  // The distinct database sequences to score, in file order.
+  std::vector<std::string> iedb_data;
   std::map<std::string, std::vector<IEDB_data_row>> iedb_map =
-      create_IEDB_map(iedb_file, &is_schema2);
-
-  // Check -p and -c before scoring, so a bad database or path fails fast.
-  std::ofstream per_group_out, collapsed_out;
-  if (!open_summary_file('p', per_group_file, is_schema2, per_group_out) ||
-      !open_summary_file('c', collapsed_file, is_schema2, collapsed_out))
-    return EXIT_FAILURE;
-
-  std::vector<std::string> iedb_data = read_IEDB_data(iedb_file);
-  // Check if we didn't read any data into IEDB data
-  if (iedb_data.size() == 0) {
-    std::cout
-        << "Failed to read database file - please specify the path to database "
-           "file if not ./data/IEDB_data.tsv"
-        << std::endl;
-
+      create_IEDB_map(iedb_file, &iedb_data, species, antigen_types);
+  if (iedb_data.empty()) {
+    if (!antigen_types.empty())
+      std::cerr << "No receptors in " << iedb_file
+                << " match the requested antigen types"
+                << (species.empty() ? "" : " and species") << "." << std::endl;
+    else if (!species.empty())
+      std::cerr << "No receptors of the requested species in " << iedb_file
+                << ". Run with --list-species to see the species it has."
+                << std::endl;
+    else
+      std::cerr << "No sequences found in the database file " << iedb_file
+                << std::endl;
     return EXIT_FAILURE;
   }
+
+  // Check -p and -c before scoring, so a bad path fails fast.
+  std::ofstream per_group_out, collapsed_out;
+  if (!open_summary_file(per_group_file, per_group_out) ||
+      !open_summary_file(collapsed_file, collapsed_out))
+    return EXIT_FAILURE;
   std::string line;
   std::string seq;
   std::string alphabet;
@@ -229,6 +267,19 @@ int main(int argc, char *argv[]) {
     file1.close();
   }
 
+  // k3_sum can't score sequences longer than MAX_SEQ_LEN.
+  {
+    std::vector<peptide> kept;
+    for (const peptide &pep : peplist1) {
+      if (pep.len > MAX_SEQ_LEN)
+        std::cerr << "Input sequence " << pep.seq << " is longer than "
+                  << MAX_SEQ_LEN << " residues. Skipping." << std::endl;
+      else
+        kept.push_back(pep);
+    }
+    peplist1.swap(kept);
+  }
+
 // Calculate the normalization score (aff) (kernel 3 self vs self) list 1
 #pragma omp parallel for
   for (int i = 0; i < peplist1.size(); i++) {
@@ -250,6 +301,11 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
       }
     }
+    if ((int)(*it).length() > MAX_SEQ_LEN) {
+      std::cerr << "Database sequence " << *it << " is longer than "
+                << MAX_SEQ_LEN << " residues" << std::endl;
+      return EXIT_FAILURE;
+    }
     peplist2.push_back({*it, int((*it).length()), -99.9, int_vec});
   }
 
@@ -269,7 +325,7 @@ int main(int argc, char *argv[]) {
   // ';' lists by receptor group (see group_by_cdr3).
   std::vector<std::string> per_group_output, collapsed_output;
   std::vector<std::string> tcrmatch_output = multi_calc_k3(
-      peplist1, peplist2, threshold, iedb_map, is_schema2,
+      peplist1, peplist2, threshold, iedb_map,
       per_group_file.empty() ? nullptr : &per_group_output,
       collapsed_file.empty() ? nullptr : &collapsed_output);
 

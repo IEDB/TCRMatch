@@ -1,0 +1,3 @@
+trimmed_input_sequence	match_sequence	score	untrimmed_match_sequence	n_receptor_groups	receptor_groups	n_epitopes	epitopes	n_antigens	antigens	n_organisms	organisms	n_receptor_species	receptor_species
+ASSSRSSYEQY	ASSSRSAYEQY	0.980716	ASSSRSAYEQY	1	14944	1	LLDSVQPIARELY	0		0		1	Homo sapiens
+ASSSRSSYEQY	ASSSRSSYEQY	1.000000	ASSSRSSYEQY	1	29231	1	EAAGIGILTV	1	Melanoma antigen recognized by T-cells 1	1	Homo sapiens (human)	1	Homo sapiens

@@ -3,5 +3,6 @@ tcrmatch.dSYM/
 
 # Databases are downloaded by scripts/update.sh, not tracked
 data/IEDB_data*.tsv
+data/CEDAR_data*.tsv
 data/.*.download
 data_archive/

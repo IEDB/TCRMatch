@@ -15,6 +15,8 @@
 #include <sstream>
 #include <unordered_set>
 #include <atomic>
+#include <cctype>
+#include <getopt.h>
 
 std::atomic<size_t> current_memory_usage(0); // Global memory tracker
 size_t MEMORY_LIMIT = 2L * 1024 * 1024 * 1024; // max: 2GB
@@ -103,6 +105,10 @@ std::string get_nth_field(std::string &str, int n) {
 std::array<std::array<float, 20>, 20> k1;
 int P_KMIN = 1;
 int P_KMAX = 30;
+// k3_sum keeps k-mer products in a float[31][31][31] buffer, so longer
+// sequences would overflow it. Longer inputs are skipped; a longer database
+// sequence is an error.
+const int MAX_SEQ_LEN = 30;
 float P_BETA = 0.11387;
 
 // Hardcoded because parsing + computing matrix is annoying
@@ -184,34 +190,6 @@ std::string trim(std::string line) {
     return line;
 }
 
-std::vector<std::string> read_IEDB_data(std::string IEDB_data_file) {
-  /**
-   * Read the IEDB data file
-   *
-   * A database can have several rows for the same trimmed sequence (one per
-   * receptor group in the schema2 file); each sequence is returned once, in
-   * order of first appearance, so it is only scored once.
-   *
-   * @param IEDB_data_file: path to IEDB data file
-   * @return: vector of distinct trimmed sequences
-   */
-  std::vector<std::string> iedb_data;
-  std::unordered_set<std::string> seen;
-  std::ifstream iedb_file(IEDB_data_file);
-  std::string line;
-  while (getline(iedb_file, line)) {
-    std::stringstream ss(line);
-    std::string sequence;
-    ss >> sequence;
-    if (!sequence.empty() && sequence != "trimmed_seq" &&
-        seen.insert(sequence).second) {
-      iedb_data.push_back(sequence);
-    }
-  }
-
-  return iedb_data;
-}
-
 struct IEDB_data_row {
   std::string amino_acid_sequence;
   std::string original_sequence;
@@ -241,81 +219,288 @@ std::string field_or_empty(const std::vector<std::string> &fields, int idx) {
   return fields[idx];
 }
 
-std::map<std::string, std::vector<IEDB_data_row>>
-create_IEDB_map(std::string IEDB_data_file, bool *is_schema2 = nullptr) {
+std::vector<std::string> split_list(const std::string &list, char sep) {
   /**
-   * Create a map of IEDB data, keyed by trimmed sequence
+   * Split a database list field, keeping empty entries (schema2 uses empty
+   * placeholders so that entry n of each list describes the same epitope).
+   */
+  std::vector<std::string> items;
+  size_t start = 0, pos;
+  while ((pos = list.find(sep, start)) != std::string::npos) {
+    items.push_back(list.substr(start, pos - start));
+    start = pos + 1;
+  }
+  items.push_back(list.substr(start));
+  return items;
+}
+
+std::string join_list(const std::vector<std::string> &items, char sep) {
+  std::string out;
+  for (size_t i = 0; i < items.size(); i++) {
+    if (i)
+      out += sep;
+    out += items[i];
+  }
+  return out;
+}
+
+std::string to_lower(std::string text) {
+  std::transform(text.begin(), text.end(), text.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  return text;
+}
+
+std::vector<std::string> parse_name_list(const std::string &arg) {
+  /**
+   * --species or --antigen-type argument: comma-separated names, trimmed and
+   * lowercased.
+   */
+  std::vector<std::string> names;
+  std::stringstream ss(arg);
+  std::string name;
+  while (getline(ss, name, ',')) {
+    size_t first = name.find_first_not_of(" \t");
+    size_t last = name.find_last_not_of(" \t");
+    if (first != std::string::npos)
+      names.push_back(to_lower(name.substr(first, last - first + 1)));
+  }
+  return names;
+}
+
+int species_match(const std::string &species,
+                  const std::vector<std::string> &names) {
+  /**
+   * Index of the first name in names (lowercased) that matches species, or
+   * -1. Matching ignores case, and a name also matches its strains: "Mus
+   * musculus" matches "Mus musculus C57BL/6".
+   */
+  std::string lower = to_lower(species);
+  for (size_t i = 0; i < names.size(); i++)
+    if (lower == names[i] || (lower.size() > names[i].size() &&
+                              lower.compare(0, names[i].size(), names[i]) == 0 &&
+                              lower[names[i].size()] == ' '))
+      return i;
+  return -1;
+}
+
+// CEDAR's antigen types, as written in the antigen_types database column.
+const std::vector<std::string> ANTIGEN_TYPES = {"neoantigen", "viral",
+                                                "germline", "other"};
+
+std::vector<std::string> parse_antigen_types(const std::string &arg) {
+  /**
+   * --antigen-type argument: comma-separated antigen types, lowercased.
+   * Exits on an empty list or an unknown type.
+   */
+  std::vector<std::string> types = parse_name_list(arg);
+  if (types.empty()) {
+    std::cerr << "--antigen-type needs at least one of: "
+              << join_list(ANTIGEN_TYPES, ',') << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  for (const std::string &type : types)
+    if (std::find(ANTIGEN_TYPES.begin(), ANTIGEN_TYPES.end(), type) ==
+        ANTIGEN_TYPES.end()) {
+      std::cerr << "Unknown antigen type '" << type
+                << "'. Use one or more of: " << join_list(ANTIGEN_TYPES, ',')
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  return types;
+}
+
+bool keep_antigen_types(IEDB_data_row &row, const std::string &types_field,
+                        const std::vector<std::string> &wanted,
+                        std::vector<bool> *found) {
+  /**
+   * --antigen-type: keep only the row's epitopes with at least one of the
+   * wanted antigen types, keeping the epitope, organism and antigen lists in
+   * step.
    *
-   * If the first line starts with "trimmed_seq" it is a header and columns
-   * are found by name, so both the legacy IEDB_data.tsv (6 columns) and
-   * IEDB_data.schema2.tsv (adds receptor_species) work, and unknown extra
-   * columns are ignored. Without a header (e.g. a plain list of CDR3b
-   * sequences), columns are read positionally in the legacy order and missing
-   * ones are left empty.
+   * @param types_field: the row's antigen_types ('|' list in step with the
+   *                     epitopes; each entry a ',' list of types)
+   * @param found: found[i] is set when wanted[i] occurs in the row
+   * @return: false if none of the row's epitopes is kept
+   */
+  std::vector<std::string> types = split_list(types_field, '|');
+  std::vector<std::string> epitopes = split_list(row.epitope, '|');
+  std::vector<std::string> organisms = split_list(row.organism, '|');
+  std::vector<std::string> antigens = split_list(row.antigen, '|');
+  std::vector<std::string> kept_epitopes, kept_organisms, kept_antigens;
+  for (size_t i = 0; i < epitopes.size(); i++) {
+    bool keep = false;
+    if (i < types.size())
+      for (const std::string &type : split_list(types[i], ','))
+        for (size_t w = 0; w < wanted.size(); w++)
+          if (to_lower(type) == wanted[w]) {
+            keep = true;
+            (*found)[w] = true;
+          }
+    if (!keep)
+      continue;
+    kept_epitopes.push_back(epitopes[i]);
+    kept_organisms.push_back(i < organisms.size() ? organisms[i] : "");
+    kept_antigens.push_back(i < antigens.size() ? antigens[i] : "");
+  }
+  if (kept_epitopes.empty())
+    return false;
+  row.epitope = join_list(kept_epitopes, '|');
+  row.organism = join_list(kept_organisms, '|');
+  row.antigen = join_list(kept_antigens, '|');
+  return true;
+}
+
+void database_error(const std::string &file, const std::string &problem) {
+  std::cerr << "Database file " << file << " " << problem << std::endl
+            << "TCRMatch " << VERSION
+            << " needs IEDB_data.schema2.tsv (one line per receptor group, "
+               "with a receptor_species column). Download it with "
+               "scripts/update.sh."
+            << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+std::map<std::string, std::vector<IEDB_data_row>>
+create_IEDB_map(const std::string &IEDB_data_file,
+                std::vector<std::string> *sequences,
+                const std::vector<std::string> &species = {},
+                const std::vector<std::string> &antigen_types = {}) {
+  /**
+   * Read the database, keyed by trimmed sequence.
    *
-   * @param IEDB_data_file: path to IEDB data file
-   * @param is_schema2: if given, set to whether the header has the schema2
-   *                    receptor_species column ('|'-separated, aligned lists)
-   * @return: map of IEDB data
+   * The file must start with a header, and columns are found by name, so
+   * their order doesn't matter and unknown columns are ignored. The legacy
+   * IEDB_data.tsv (no receptor_species column) or a file without a header is
+   * an error.
+   *
+   * @param IEDB_data_file: path to the database
+   * @param sequences: filled with the distinct trimmed sequences to score,
+   *                   in order of first appearance
+   * @param species: if not empty, keep only receptor groups of these species
+   *                 (lowercased, see species_match)
+   * @param antigen_types: if not empty, keep only epitopes of these antigen
+   *                       types (lowercased, see keep_antigen_types), and
+   *                       only receptor groups with such an epitope. Needs
+   *                       an antigen_types column (the CEDAR database).
+   * @return: map of database rows
    */
   std::map<std::string, std::vector<IEDB_data_row>> iedb_map;
-  if (is_schema2)
-    *is_schema2 = false;
   std::ifstream iedb_file(IEDB_data_file);
+  if (!iedb_file) {
+    std::cerr << "Cannot read the database file " << IEDB_data_file
+              << ". Download it with scripts/update.sh, or give its path "
+                 "with -d."
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
   std::string line;
+  getline(iedb_file, line);
+  erase_newline(line);
+  std::vector<std::string> fields = split_tabs(line);
+  if (fields.empty() || fields[0] != "trimmed_seq")
+    database_error(IEDB_data_file,
+                   "has no header line (it should start with trimmed_seq).");
+  std::map<std::string, int> col;
+  for (int i = 0; i < (int)fields.size(); i++)
+    col[fields[i]] = i;
+  const char *required[] = {"trimmed_seq",      "original_seq",
+                            "receptor_group",   "epitopes",
+                            "source_organisms", "source_antigens"};
+  for (const char *name : required) {
+    if (col.find(name) == col.end()) {
+      std::cerr << "Database file " << IEDB_data_file
+                << " is missing the required column '" << name << "'"
+                << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+  if (col.find("receptor_species") == col.end())
+    database_error(IEDB_data_file,
+                   "is in the legacy format of TCRMatch 1.3 and earlier.");
+  int c_trimmed = col["trimmed_seq"], c_original = col["original_seq"],
+      c_group = col["receptor_group"], c_epitopes = col["epitopes"],
+      c_organisms = col["source_organisms"],
+      c_antigens = col["source_antigens"],
+      c_species = col["receptor_species"];
+  int c_types = col.count("antigen_types") ? col["antigen_types"] : -1;
+  if (!antigen_types.empty() && c_types < 0) {
+    std::cerr << "--antigen-type needs a database with an antigen_types "
+                 "column, such as data/CEDAR_data.schema2.tsv; "
+              << IEDB_data_file << " has none." << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
-  // Column indices in the legacy (headerless) order.
-  int c_trimmed = 0, c_original = 1, c_group = 2, c_epitopes = 3,
-      c_organisms = 4, c_antigens = 5, c_species = -1;
-
-  bool first_line = true;
+  std::vector<bool> species_found(species.size(), false);
+  std::vector<bool> types_found(antigen_types.size(), false);
   while (getline(iedb_file, line)) {
     erase_newline(line);
-    std::vector<std::string> fields = split_tabs(line);
-
-    if (first_line) {
-      first_line = false;
-      if (!fields.empty() && fields[0] == "trimmed_seq") {
-        std::map<std::string, int> col;
-        for (int i = 0; i < (int)fields.size(); i++)
-          col[fields[i]] = i;
-        const char *required[] = {"trimmed_seq",      "original_seq",
-                                  "receptor_group",   "epitopes",
-                                  "source_organisms", "source_antigens"};
-        for (const char *name : required) {
-          if (col.find(name) == col.end()) {
-            std::cerr << "Database file " << IEDB_data_file
-                      << " is missing the required column '" << name << "'"
-                      << std::endl;
-            exit(EXIT_FAILURE);
-          }
-        }
-        c_trimmed = col["trimmed_seq"];
-        c_original = col["original_seq"];
-        c_group = col["receptor_group"];
-        c_epitopes = col["epitopes"];
-        c_organisms = col["source_organisms"];
-        c_antigens = col["source_antigens"];
-        c_species =
-            col.count("receptor_species") ? col["receptor_species"] : -1;
-        if (is_schema2)
-          *is_schema2 = c_species >= 0;
-        continue;
-      }
-    }
-
+    fields = split_tabs(line);
     std::string key = field_or_empty(fields, c_trimmed);
     if (key.empty())
       continue;
-    iedb_map[key].push_back({key, field_or_empty(fields, c_original),
-                             field_or_empty(fields, c_group),
-                             field_or_empty(fields, c_epitopes),
-                             field_or_empty(fields, c_organisms),
-                             field_or_empty(fields, c_antigens),
-                             field_or_empty(fields, c_species)});
+    std::string row_species = field_or_empty(fields, c_species);
+    if (!species.empty()) {
+      int found = species_match(row_species, species);
+      if (found < 0)
+        continue;
+      species_found[found] = true;
+    }
+    IEDB_data_row row = {key, field_or_empty(fields, c_original),
+                         field_or_empty(fields, c_group),
+                         field_or_empty(fields, c_epitopes),
+                         field_or_empty(fields, c_organisms),
+                         field_or_empty(fields, c_antigens), row_species};
+    if (!antigen_types.empty() &&
+        !keep_antigen_types(row, field_or_empty(fields, c_types),
+                            antigen_types, &types_found))
+      continue;
+    auto &rows = iedb_map[key];
+    if (rows.empty())
+      sequences->push_back(key);
+    rows.push_back(row);
   }
 
+  for (size_t i = 0; i < species.size(); i++)
+    if (!species_found[i])
+      std::cerr << "No receptors of species '" << species[i] << "' in "
+                << IEDB_data_file << " (see --list-species)." << std::endl;
+  for (size_t i = 0; i < antigen_types.size(); i++)
+    if (!types_found[i])
+      std::cerr << "No epitopes of antigen type '" << antigen_types[i]
+                << "' in " << IEDB_data_file
+                << (species.empty() ? "" : " for the requested species") << "."
+                << std::endl;
   return iedb_map;
+}
+
+int list_species(const std::string &IEDB_data_file) {
+  /**
+   * --list-species: print each receptor species in the database with its
+   * number of receptor groups and CDR3b sequences, most groups first.
+   */
+  std::vector<std::string> sequences;
+  auto iedb_map = create_IEDB_map(IEDB_data_file, &sequences);
+  std::map<std::string, std::set<std::string>> groups, cdr3s;
+  for (const auto &entry : iedb_map)
+    for (const IEDB_data_row &row : entry.second) {
+      groups[row.receptor_species].insert(row.receptor_group);
+      cdr3s[row.receptor_species].insert(entry.first);
+    }
+  std::vector<std::string> names;
+  for (const auto &g : groups)
+    names.push_back(g.first);
+  std::stable_sort(names.begin(), names.end(),
+                   [&groups](const std::string &a, const std::string &b) {
+                     return groups[a].size() > groups[b].size();
+                   });
+  std::cout << "receptor_species\tn_receptor_groups\tn_cdr3b_sequences"
+            << std::endl;
+  for (const std::string &name : names)
+    std::cout << (name.empty() ? "(not recorded)" : name) << "\t"
+              << groups[name].size() << "\t" << cdr3s[name].size()
+              << std::endl;
+  return 0;
 }
 
 std::vector<std::string> read_AIRR_data(std::string AIRR_data_file) {
@@ -492,31 +677,6 @@ find_matches(std::vector<peptide>& peplist1, std::vector<peptide>& peplist2, flo
 
 
 
-std::vector<std::string> split_list(const std::string &list, char sep) {
-  /**
-   * Split a database list field, keeping empty entries (schema2 uses empty
-   * placeholders so that entry n of each list describes the same epitope).
-   */
-  std::vector<std::string> items;
-  size_t start = 0, pos;
-  while ((pos = list.find(sep, start)) != std::string::npos) {
-    items.push_back(list.substr(start, pos - start));
-    start = pos + 1;
-  }
-  items.push_back(list.substr(start));
-  return items;
-}
-
-std::string join_list(const std::vector<std::string> &items, char sep) {
-  std::string out;
-  for (size_t i = 0; i < items.size(); i++) {
-    if (i)
-      out += sep;
-    out += items[i];
-  }
-  return out;
-}
-
 struct epitope_summary {
   std::string epitope;
   std::vector<std::string> receptor_groups;  // distinct, in database order
@@ -531,7 +691,7 @@ std::vector<std::string> collapse_by_epitope(
     std::map<std::string, std::vector<IEDB_data_row>> &iedb_map) {
   /**
    * Collapse matches to one line per (input sequence, match sequence,
-   * epitope), for the schema2 database. Each receptor group of the matched
+   * epitope). Each receptor group of the matched
    * sequence counts once for every epitope in its list.
    *
    * Output columns: input_sequence, match_sequence, score, epitope, antigen,
@@ -626,26 +786,15 @@ std::vector<std::string> collapse_by_epitope(
   return out;
 }
 
-bool open_summary_file(char flag, const std::string &path, bool is_schema2,
-                       std::ofstream &out) {
+bool open_summary_file(const std::string &path, std::ofstream &out) {
   /**
    * Open the file for an extra output view (-p, -c), if one was requested.
-   * Both views split the database's lists by receptor group, so they need a
-   * schema2 database. Called before scoring, so problems are reported early.
+   * Called before scoring, so problems are reported early.
    *
    * @return: false (after printing an error) if the run should stop
    */
   if (path.empty())
     return true;
-  if (!is_schema2) {
-    std::cerr << "-" << flag
-              << " needs a schema2 database (with a receptor_species column), "
-                 "e.g. -d data/IEDB_data.schema2.tsv. The legacy database "
-                 "pools epitopes across receptor groups, so they cannot be "
-                 "split by receptor group."
-              << std::endl;
-    return false;
-  }
   out.open(path);
   if (!out) {
     std::cerr << "Cannot write to " << path << std::endl;
@@ -725,37 +874,30 @@ std::string match_prefix(const match_tuple &match) {
 
 std::vector<std::string>
 group_by_cdr3(const std::vector<match_tuple> &matches,
-              const std::map<std::string, std::vector<IEDB_data_row>> &iedb_map,
-              bool is_schema2) {
+              const std::map<std::string, std::vector<IEDB_data_row>> &iedb_map) {
   /**
    * The standard output: one line per (input sequence, match sequence,
-   * untrimmed CDR3b as recorded in IEDB), the same lines as the legacy
-   * database's rows.
+   * untrimmed CDR3b as recorded in the database).
    *
    * Columns: input_sequence, match_sequence, score, untrimmed_match_sequence,
    * then n_receptor_groups, receptor_groups, n_epitopes, epitopes,
    * n_antigens, antigens, n_organisms, organisms, n_receptor_species,
    * receptor_species. Each list column has one ';'-separated entry per
-   * receptor group, in the same order; with schema2, each entry is that
-   * group's '|'-separated list, unchanged. Each n_* column counts the
-   * distinct non-empty values in its list.
-   *
-   * A legacy or headerless database has one receptor group per line and its
-   * lists cannot be trusted, so the n_* columns are left empty.
+   * receptor group, in the same order; each entry is that group's
+   * '|'-separated list, unchanged. Each n_* column counts the distinct
+   * non-empty values in its list.
    */
   std::vector<std::string> out;
   for (const match_tuple *match : distinct_matches(matches)) {
     std::vector<IEDB_data_row> rows = rows_for_match(std::get<1>(*match), iedb_map);
 
-    // One block of rows per output line, in database order: schema2 rows
-    // are grouped by untrimmed sequence. Legacy and headerless databases
-    // already have one row per untrimmed sequence (or none recorded), so
-    // each of their rows is its own line, as in earlier versions.
+    // One block of rows per output line, in database order: rows are
+    // grouped by untrimmed sequence.
     std::vector<std::vector<const IEDB_data_row *>> blocks;
     std::map<std::string, size_t> block_of_original;
     for (const IEDB_data_row &row : rows) {
       auto found = block_of_original.find(row.original_sequence);
-      if (is_schema2 && found != block_of_original.end()) {
+      if (found != block_of_original.end()) {
         blocks[found->second].push_back(&row);
       } else {
         block_of_original[row.original_sequence] = blocks.size();
@@ -777,15 +919,12 @@ group_by_cdr3(const std::vector<match_tuple> &matches,
         append_split(all_antigens, row->antigen);
         append_split(all_organisms, row->organism);
       }
-      auto count = [is_schema2](const std::vector<std::string> &values) {
-        return is_schema2 ? count_distinct(values) : std::string();
-      };
       out.push_back(match_prefix(*match) + original + "\t" +
-                    count(groups) + "\t" + join_list(groups, ';') + "\t" +
-                    count(all_epitopes) + "\t" + join_list(epitopes, ';') + "\t" +
-                    count(all_antigens) + "\t" + join_list(antigens, ';') + "\t" +
-                    count(all_organisms) + "\t" + join_list(organisms, ';') + "\t" +
-                    count(species) + "\t" + join_list(species, ';') + "\n");
+                    count_distinct(groups) + "\t" + join_list(groups, ';') + "\t" +
+                    count_distinct(all_epitopes) + "\t" + join_list(epitopes, ';') + "\t" +
+                    count_distinct(all_antigens) + "\t" + join_list(antigens, ';') + "\t" +
+                    count_distinct(all_organisms) + "\t" + join_list(organisms, ';') + "\t" +
+                    count_distinct(species) + "\t" + join_list(species, ';') + "\n");
     }
   }
   return out;
@@ -795,7 +934,7 @@ std::vector<std::string> per_receptor_group(
     const std::vector<match_tuple> &matches,
     const std::map<std::string, std::vector<IEDB_data_row>> &iedb_map) {
   /**
-   * The -p view, for the schema2 database: one line per (input sequence,
+   * The -p view: one line per (input sequence,
    * match sequence, receptor group).
    *
    * Columns: input_sequence, match_sequence, score, untrimmed_match_sequence,
@@ -822,7 +961,6 @@ std::vector<std::string>
 multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
               float threshold,
               std::map<std::string, std::vector<IEDB_data_row>> &iedb_map,
-              bool is_schema2,
               std::vector<std::string> *per_group_output = nullptr,
               std::vector<std::string> *collapsed_output = nullptr) {
   /**
@@ -832,7 +970,6 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
    * @param peplist2: peptide list 2 (database)
    * @param threshold: K3 threshold
    * @param iedb_map: IEDB map
-   * @param is_schema2: whether the database is schema2 (see create_IEDB_map)
    * @param per_group_output: if given, also filled with one line per
    *                          receptor group (see per_receptor_group)
    * @param collapsed_output: if given, also filled with the matches
@@ -845,5 +982,5 @@ multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
     *per_group_output = per_receptor_group(unique_vec, iedb_map);
   if (collapsed_output)
     *collapsed_output = collapse_by_epitope(unique_vec, iedb_map);
-  return group_by_cdr3(unique_vec, iedb_map, is_schema2);
+  return group_by_cdr3(unique_vec, iedb_map);
 }

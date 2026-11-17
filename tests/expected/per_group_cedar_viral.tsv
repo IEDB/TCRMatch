@@ -1,0 +1,29 @@
+trimmed_input_sequence	match_sequence	score	untrimmed_match_sequence	receptor_group	n_epitopes	epitopes	n_antigens	antigens	n_organisms	organisms	receptor_species
+ASSSRSSYEQY	AISSRSSYEQY	0.976650	AISSRSSYEQY	12324	1	NLVPMVATV	1	pp65	1	Human herpesvirus 5 (Human cytomegalovirus)	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	37845	1	GLCTLVAML	1	BMLF1 protein	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSARSSYEQY	0.982682	ASSARSSYEQY	39732	1	RAKFKQLL	1	BZLF1	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSRSSYEQY	0.975811	ASSRSSYEQY	45711	1	AVFDRKSDAK	1	EBNA-3B nuclear protein	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSSSRSSYEQY	0.978749	ASSSSRSSYEQY	9409	1	NLVPMVATV	1	pp65	1	Human herpesvirus 5 (Human cytomegalovirus)	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	13679	1	GLCTLVAML	1	BMLF1 protein	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	27391	1	RAKFKQLL	1	BZLF1	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSSRSSYEQY	ASSTRSSYEQY	0.982019	ASSTRSSYEQY	41479	1	GLCTLVAML	1	BMLF1 protein	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSFQGYTEA	ASSFQGFTEA	0.972678	ASSFQGFTEA	206585	1	NLVPMVATV	1	pp65	1	Human herpesvirus 5 (Human cytomegalovirus)	Homo sapiens
+ASSLGQAYEQY	AASLGQAYEQY	0.987688	AASLGQAYEQY	1942	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASALGQAYEQY	0.983312	ASALGQAYEQY	1933	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSIGQAYEQY	0.982577	ASSIGQAYEQY	26266	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSIGQAYEQY	0.982577	ASSIGQAYEQY	206873	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEAY	0.974473	ASSLGQAYEAY	1940	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQA	0.981858	ASSLGQAYEQA	1935	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1412	2	FLRGRAYGL|RPPIFIRRL	2	nuclear antigen EBNA-3|EBNA3A nuclear protein	1	Human herpesvirus 4 (Epstein Barr virus)|Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1949	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1955	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1956	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	1957	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2003	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2004	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2005	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2006	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2007	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	2008	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSLGQAYEQY	1.000000	ASSLGQAYEQY	18174	2	FLRGRAYGL|GLCTLVAML	2	nuclear antigen EBNA-3|BMLF1 protein	1	Human herpesvirus 4 (Epstein Barr virus)|Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens
+ASSLGQAYEQY	ASSVGQAYEQY	0.978528	ASSVGQAYEQY	26257	1	FLRGRAYGL	1	nuclear antigen EBNA-3	1	Human herpesvirus 4 (Epstein Barr virus)	Homo sapiens

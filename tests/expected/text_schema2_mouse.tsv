@@ -1,0 +1,3 @@
+trimmed_input_sequence	match_sequence	score	untrimmed_match_sequence	n_receptor_groups	receptor_groups	n_epitopes	epitopes	n_antigens	antigens	n_organisms	organisms	n_receptor_species	receptor_species
+ASSSRSSYEQY	ASSERSSYEQY	0.972149	ASSERSSYEQY	1	21200	1	AMKRHGLDNYREYSLGN	0		0		1	Mus musculus
+ASSPGLGTYEQY	ASSPGLGTYEQY	1.000000	ASSPGLGTYEQY	1	187364	1	KYNKANVFL	0		0		1	Mus musculus
